@@ -1,0 +1,117 @@
+# The Salesforce plugin (c-564), the shape in chanl-platform docs/plans/ops-ai/plugin-contents-and-knowledge.html.
+# Everything here is data run by tools-service's http executor, except list_articles (kb.py).
+schema: ops-ai/plugin@2
+id: opsai.salesforce
+title: Salesforce
+version: 0.1.0
+sdk: "1"
+
+connection:
+  kinds: [oauth2_auth_code]
+  authorize_url: "{login_url}/authorize"
+  token_url: "{login_url}/token"
+  revoke_url: "{login_url}/revoke"
+  scopes:
+    - { id: openid, label: "Know which account signed in", required: true }
+    - { id: api, label: "Read and change records", required: true }
+    - { id: refresh_token, label: "Stay signed in", required: true }
+  sign_in: [team, person, person_or_team]
+  # Salesforce names the org's own address in its token answer; it must be under My Domain. `.test` can never be
+  # registered (RFC 2606), so the fake Salesforce's host is safe to accept.
+  from_token: { instance_url: instance_url }
+  token_hosts: [.my.salesforce.com, .my.salesforce.test]
+  health_check: { path: "/services/data/v{api_version}/limits" }
+
+settings:
+  login_url: { type: string, default: "https://login.salesforce.com/services/oauth2", title: Sign-in address }
+  instance_url: { type: string, title: Instance, from_token: true }
+  api_version: { type: string, default: "61.0", title: API version, lockable: true }
+  article_body_field: { type: string, default: Body__c, title: Article body field }
+
+egress: ["{instance_url}"]
+endpoint: "{instance_url}/services/data/v{api_version}"
+
+tools:
+  - name: query
+    description: Records matching a SOQL query, such as SELECT Id, CaseNumber, Status FROM Case WHERE CaseNumber = '00044818'
+    access: read
+    input: { q: { type: string, description: "The SOQL query" } }
+    request: { method: GET, path: /query }
+  - name: get_record
+    description: One record by its object and id
+    access: read
+    input:
+      object: { type: string, description: "The object, such as Case" }
+      id: { type: string, description: "The record id" }
+    request: { method: GET, path: "/sobjects/{object}/{id}" }
+  - name: describe
+    description: The field names of an object
+    access: read
+    input: { object: { type: string, description: "The object, such as Case" } }
+    request: { method: GET, path: "/sobjects/{object}/describe" }
+    transform: "{{ data.fields | map(attribute='name') | list | tojson }}"
+  - name: create_record
+    description: Creates a record of an object with the given fields
+    access: write
+    input:
+      object: { type: string, description: "The object, such as Case" }
+      fields: { type: object, description: "Field names and values" }
+    request: { method: POST, path: "/sobjects/{object}", body: "{{fields}}" }
+  - name: update_record
+    description: Changes fields of one record
+    access: write
+    input:
+      object: { type: string, description: "The object, such as Case" }
+      id: { type: string, description: "The record id" }
+      fields: { type: object, description: "Field names and their new values" }
+    request: { method: PATCH, path: "/sobjects/{object}/{id}", body: "{{fields}}" }
+  - name: upsert_record
+    description: Creates or changes the record whose external key field holds the key
+    access: write
+    input:
+      object: { type: string, description: "The object, such as Case" }
+      key_field: { type: string, description: "The external id field" }
+      key: { type: string, description: "Its value" }
+      fields: { type: object, description: "Field names and values" }
+    request: { method: PATCH, path: "/sobjects/{object}/{key_field}/{key}", body: "{{fields}}" }
+  - name: list_articles
+    description: Published Knowledge articles changed since a time, a page at a time
+    access: read
+    knowledge: list_items
+    rate_limit_per_min: 60
+    function: ops_plugin_salesforce.kb:list_articles
+    input:
+      since: { type: string, required: false, description: "Only articles changed after this time" }
+      cursor: { type: string, required: false, description: "The page after the one that gave it" }
+  - name: get_article
+    description: One Knowledge article or attachment, as a knowledge item
+    access: read
+    knowledge: get_item
+    rate_limit_per_min: 60
+    input: { id: { type: string, description: "The article or attachment id" } }
+    request: { method: GET, path: "/sobjects/Knowledge__kav/{id}" }
+    transform: >-
+      {%- set kids = [] -%}
+      {%- for a in data.attachments -%}
+      {%- set _ = kids.append({"id": a.Id, "title": a.Title, "updated_at": a.LastModifiedDate}) -%}
+      {%- endfor -%}
+      {{ {"id": data.Id, "title": data.Title, "updated_at": data.LastModifiedDate,
+          "mime": data.Mime__c | default("text/html"), "encoding": "text",
+          "content": data[settings.article_body_field], "url": settings.instance_url ~ "/" ~ data.Id,
+          "children": kids} | tojson }}
+
+knowledge_sources:
+  - name: articles
+    title: Salesforce Knowledge articles
+    list: list_articles
+    get: get_article
+    schedule: { kind: daily, time: "02:00" }
+
+templates:
+  - kind: agent
+    id: case-helper
+    version: 1
+    path: templates/case-helper.yaml
+    requires:
+      tools: [query, get_record, update_record]
+      bind: [{ knowledge_base: "Salesforce articles" }, { model_alias: chat }]

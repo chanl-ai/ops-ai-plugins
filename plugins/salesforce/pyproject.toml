@@ -1,0 +1,26 @@
+[project]
+name = "ops-plugin-salesforce"
+version = "0.1.0"
+description = "The Salesforce plugin for Ops AI: a connection with instance_url from the token, six record tools, and a knowledge source over Knowledge articles"
+license = "Apache-2.0"
+requires-python = ">=3.12,<3.13"
+dependencies = ["ops-plugin-sdk"]
+
+# How tools-service finds it: every installed package in this group is a plugin.
+[project.entry-points."ops_ai.plugins"]
+salesforce = "ops_plugin_salesforce:plugin"
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ops_plugin_salesforce"]
+
+[tool.uv.sources]
+# The kit from the ops-ai checkout beside this repository; a release pins the kit by version instead.
+ops-plugin-sdk = { path = "../../../ops-ai/packages/ops_plugin_sdk", editable = true }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
