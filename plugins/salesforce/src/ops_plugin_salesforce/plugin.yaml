@@ -1,4 +1,4 @@
-# The Salesforce plugin (c-564), the shape in chanl-platform docs/plans/ops-ai/plugin-contents-and-knowledge.html.
+# The Salesforce plugin: a connection whose host comes from the token, record tools and a Knowledge source.
 # Everything here is data run by tools-service's http executor, except list_articles (kb.py).
 schema: ops-ai/plugin@2
 id: opsai.salesforce
