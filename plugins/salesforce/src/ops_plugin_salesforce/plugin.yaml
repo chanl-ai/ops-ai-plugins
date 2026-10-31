@@ -16,19 +16,21 @@ connection:
     - { id: api, label: "Read and change records", required: true }
     - { id: refresh_token, label: "Stay signed in", required: true }
   sign_in: [team, person, person_or_team]
-  # Salesforce names the org's own address in its token answer; it must be under My Domain. `.test` can never be
-  # registered (RFC 2606), so the fake Salesforce's host is safe to accept.
-  from_token: { instance_url: instance_url }
+  # After sign-in, Salesforce's UserInfo endpoint on the sign-in host names the org's My Domain address in
+  # urls.custom_domain; it must be under My Domain. `.test` can never be registered (RFC 2606), so the fake
+  # Salesforce's host is safe to accept. A person whose sign-in lands in another org is refused.
+  after_sign_in: { url: /services/oauth2/userinfo, read: urls.custom_domain, setting: instance_url }
   token_hosts: [.my.salesforce.com, .my.salesforce.test]
   health_check: { path: "/services/data/v{api_version}/limits" }
 
 settings:
   login_url: { type: string, default: "https://login.salesforce.com/services/oauth2", title: Sign-in address }
-  instance_url: { type: string, title: Instance, from_token: true }
+  instance_url: { type: string, title: Instance, after_sign_in: true }
   api_version: { type: string, default: "61.0", title: API version, lockable: true }
   article_body_field: { type: string, default: Body__c, title: Article body field }
+  query_batch_size: { type: integer, default: 2000, title: Records per query page }
 
-egress: ["{instance_url}"]
+egress: ["{instance_url}", "{login_url}"]
 endpoint: "{instance_url}/services/data/v{api_version}"
 
 tools:
@@ -62,6 +64,8 @@ tools:
       status: { type: string, enum: [New, Working, Escalated, Closed], description: "The cases' status" }
       since:
         { type: string, format: date-time, required: false, default: "1970-01-01T00:00:00Z", description: "Only cases changed after this time" }
+    # How many records Salesforce answers per page of a query-all (200 to 2000).
+    headers: { Sforce-Query-Options: "batchSize={query_batch_size}" }
     request:
       method: GET
       path: /queryAll
