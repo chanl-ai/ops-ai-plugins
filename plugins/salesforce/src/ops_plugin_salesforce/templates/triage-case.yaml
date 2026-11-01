@@ -1,0 +1,65 @@
+# A workflow a team installs as its own copy: reads one case, drafts a first reply, and after a person approves it marks
+# the case Working with the reply as a case comment (Salesforce turns the Case `Comments` field into a CaseComment).
+schemaVersion: 2
+id: salesforce_triage_case
+name: Triage a Salesforce case
+description: Reads a case, drafts a first reply, and once a person approves, marks the case Working with the reply as a comment.
+nodes:
+  - id: start
+    type: ops.trigger.request
+    typeVersion: 1
+    name: Case to triage
+    parameters:
+      inputSchema:
+        type: object
+        required: [caseNumber]
+        properties:
+          # Eight digits only: the number is written into a SOQL query.
+          caseNumber: { type: string, title: Case number, pattern: "^[0-9]{8}$", examples: ["00001026"] }
+  - id: read
+    type: ops.action.tool
+    typeVersion: 1
+    name: Read the case
+    parameters:
+      operation: salesforce_query
+      input: { q: "SELECT Id, CaseNumber, Subject, Status, Priority, Description FROM Case WHERE CaseNumber = '{$.input.caseNumber}'" }
+  - id: draft
+    type: ops.ai.draft
+    typeVersion: 1
+    name: Draft a first reply
+    parameters:
+      text: "$.nodes.read.out.records.0"
+      instructions: Draft a short first reply to the customer about this Salesforce case. Say what happens next, in plain words, with no promises about outcomes.
+  - id: review
+    type: ops.flow.humanReview
+    typeVersion: 1
+    name: Approve the reply
+    parameters:
+      title: "Reply to case {$.input.caseNumber} and mark it Working"
+      summary: { case: "$.nodes.read.out.records.0", reply: "$.nodes.draft.out.body" }
+      approves: update
+  - id: update
+    type: ops.action.tool
+    typeVersion: 1
+    name: Mark it Working with the reply
+    parameters:
+      operation: salesforce_update_record
+      input: { object: Case, id: "$.nodes.read.out.records.0.Id", fields: { Status: Working, Comments: "$.nodes.draft.out.body" } }
+      approvedBy: review
+  - { id: done, type: ops.flow.end, typeVersion: 1, name: Triaged, parameters: { outcome: triaged } }
+  - { id: back, type: ops.flow.end, typeVersion: 1, name: Sent back, parameters: { outcome: sent_back } }
+  - { id: unread, type: ops.flow.end, typeVersion: 1, name: Not read, parameters: { outcome: not_read, result: failed } }
+  - { id: undrafted, type: ops.flow.end, typeVersion: 1, name: Not drafted, parameters: { outcome: not_drafted, result: failed } }
+  - { id: unchanged, type: ops.flow.end, typeVersion: 1, name: Not changed, parameters: { outcome: not_changed, result: failed } }
+connections:
+  - { from: { node: start, port: payload }, to: { node: read, port: in } }
+  - { from: { node: read, port: ok }, to: { node: draft, port: in } }
+  - { from: { node: read, port: refused }, to: { node: unread, port: in } }
+  - { from: { node: read, port: error }, to: { node: unread, port: in } }
+  - { from: { node: draft, port: ok }, to: { node: review, port: in } }
+  - { from: { node: draft, port: error }, to: { node: undrafted, port: in } }
+  - { from: { node: review, port: approve }, to: { node: update, port: in } }
+  - { from: { node: review, port: reject }, to: { node: back, port: in } }
+  - { from: { node: update, port: ok }, to: { node: done, port: in } }
+  - { from: { node: update, port: refused }, to: { node: unchanged, port: in } }
+  - { from: { node: update, port: error }, to: { node: unchanged, port: in } }

@@ -241,3 +241,9 @@ templates:
     requires:
       tools: [query, get_record, update_record]
       bind: [{ knowledge_base: "Salesforce articles" }, { model_alias: chat }]
+  - kind: workflow
+    id: triage-case
+    version: 1
+    path: templates/triage-case.yaml
+    requires:
+      tools: [query, update_record]
