@@ -6,6 +6,13 @@ title: Salesforce
 version: 0.1.0
 sdk: "1"
 
+# What the console's Connections card shows: a mark, a category, one line, and where an admin sets up the app.
+display:
+  logo: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2300A1E0'/><path fill='white' d='M13.3 10.5a4.6 4.6 0 0 1 7.7 1.2 5 5 0 0 1 6 4.9 5 5 0 0 1-5 5H10.5a4.2 4.2 0 0 1-.8-8.3 4.6 4.6 0 0 1 3.6-2.8z'/></svg>"
+  category: CRM
+  description: Cases, accounts, contacts and Knowledge articles in your Salesforce org.
+  docs_url: "https://help.salesforce.com/s/articleView?id=sf.connected_app_create.htm"
+
 connection:
   kinds: [oauth2_auth_code]
   authorize_url: "{login_url}/authorize"
