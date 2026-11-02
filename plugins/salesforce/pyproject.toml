@@ -1,7 +1,7 @@
 [project]
 name = "ops-plugin-salesforce"
 version = "0.1.0"
-description = "The Salesforce plugin for Ops AI: a connection with instance_url from the token, six record tools, and a knowledge source over Knowledge articles"
+description = "The Salesforce plugin for Ops AI: a connection with instance_url from the token, record, query and search tools, and a knowledge source over Knowledge articles"
 license = "Apache-2.0"
 requires-python = ">=3.12,<3.13"
 dependencies = ["ops-plugin-sdk"]

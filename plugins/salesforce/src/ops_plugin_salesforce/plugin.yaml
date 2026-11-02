@@ -1,5 +1,5 @@
-# The Salesforce plugin: a connection whose host comes from the token, record tools and a Knowledge source.
-# Everything here is data run by tools-service's http executor, except list_articles (kb.py).
+# The Salesforce plugin: a connection whose host comes from the token, record and query tools, and a Knowledge source.
+# Every tool is data: tools-service checks each input, writes it into the query by its format, and pages.
 schema: ops-ai/plugin@2
 id: opsai.salesforce
 title: Salesforce
@@ -33,11 +33,112 @@ endpoint: "{instance_url}/services/data/v{api_version}"
 
 tools:
   - name: query
+    title: Run a SOQL query
     description: Records matching a SOQL query, such as SELECT Id, CaseNumber, Status FROM Case WHERE CaseNumber = '00044818'
     access: read
     input: { q: { type: string, description: "The SOQL query" } }
     request: { method: GET, path: /query }
+  - name: find_cases
+    title: Find cases
+    description: Cases in a status changed after a time, oldest change first, a page at a time
+    access: read
+    input:
+      status: { type: string, enum: [New, Working, Escalated, Closed], description: "The cases' status" }
+      since:
+        { type: string, format: date-time, required: false, default: "1970-01-01T00:00:00Z", description: "Only cases changed after this time" }
+    request:
+      method: GET
+      path: /query
+      query:
+        q: >-
+          SELECT Id, CaseNumber, Subject, Status, AccountId, LastModifiedDate FROM Case
+          WHERE Status = '{{status}}' AND LastModifiedDate > {{since}} ORDER BY LastModifiedDate, Id
+      paging: { rule: link, next: nextRecordsUrl }
+  - name: find_cases_with_deleted
+    title: Find cases, deleted too
+    description: As Find cases, with cases deleted into the recycle bin, each marked IsDeleted
+    access: read
+    input:
+      status: { type: string, enum: [New, Working, Escalated, Closed], description: "The cases' status" }
+      since:
+        { type: string, format: date-time, required: false, default: "1970-01-01T00:00:00Z", description: "Only cases changed after this time" }
+    request:
+      method: GET
+      path: /queryAll
+      query:
+        q: >-
+          SELECT Id, CaseNumber, Subject, Status, IsDeleted, LastModifiedDate FROM Case
+          WHERE Status = '{{status}}' AND LastModifiedDate > {{since}} ORDER BY LastModifiedDate, Id
+      paging: { rule: link, next: nextRecordsUrl }
+  - name: search
+    title: Search records
+    description: Accounts, contacts and cases holding a word or phrase in any field
+    access: read
+    input: { term: { type: string, format: sosl_term, description: "The word or phrase to find" } }
+    request:
+      method: GET
+      path: /search
+      query:
+        q: "FIND {{{term}}} IN ALL FIELDS RETURNING Account(Id, Name), Contact(Id, Name, Email), Case(Id, CaseNumber, Subject)"
+  - name: search_by_fields
+    title: Search by fields
+    description: Cases in a status holding a word or phrase, with only the fields asked for, a page at a time
+    access: read
+    input:
+      term: { type: string, format: sosl_term, description: "The word or phrase to find" }
+      status: { type: string, enum: [New, Working, Escalated, Closed], description: "The cases' status" }
+      fields:
+        type: array
+        description: The case fields to return
+        items: { type: string, enum: [Id, CaseNumber, Subject, Status, Priority] }
+    request:
+      method: GET
+      path: /parameterizedSearch
+      query:
+        q: "{{term}}"
+        sobject: Case
+        Case.where: "Status = '{{status}}'"
+        Case.fields: "{{fields}}"
+      paging: { rule: offset, items: searchRecords, limit: 25, limit_param: overallLimit }
+  - name: account_cases
+    title: An account's cases
+    description: The cases of one account, a page at a time
+    access: read
+    input: { account_id: { type: string, format: salesforce_id, description: "The account's id" } }
+    request:
+      method: GET
+      path: "/sobjects/Account/{account_id}/Cases"
+      paging: { rule: link, next: nextRecordsUrl }
+  - name: cases_changed
+    title: Cases changed between dates
+    description: The ids of cases changed between two times, at most 30 days apart
+    access: read
+    input:
+      start: { type: string, format: date-time, description: "From this time" }
+      end: { type: string, format: date-time, description: "Up to this time" }
+    request:
+      method: GET
+      path: /sobjects/Case/updated/
+      query: { start: "{{start}}", end: "{{end}}" }
+  - name: list_view
+    title: Records in a list view
+    description: The records a Salesforce list view shows, a page at a time
+    access: read
+    input: { list_view: { type: string, format: salesforce_id, description: "The list view's id" } }
+    request:
+      method: GET
+      path: "/ui-api/list-records/{list_view}"
+      paging: { rule: token, next: nextPageToken, param: pageToken }
+    transform: >-
+      {%- set rows = [] -%}
+      {%- for r in data.records -%}
+      {%- set f = {} -%}
+      {%- for k, v in r.fields.items() -%}{%- set _ = f.update({k: v.value}) -%}{%- endfor -%}
+      {%- set _ = rows.append({"id": r.id, "fields": f}) -%}
+      {%- endfor -%}
+      {{ {"records": rows} | tojson }}
   - name: get_record
+    title: Get a record
     description: One record by its object and id
     access: read
     input:
@@ -45,12 +146,14 @@ tools:
       id: { type: string, description: "The record id" }
     request: { method: GET, path: "/sobjects/{object}/{id}" }
   - name: describe
+    title: An object's fields
     description: The field names of an object
     access: read
     input: { object: { type: string, description: "The object, such as Case" } }
     request: { method: GET, path: "/sobjects/{object}/describe" }
     transform: "{{ data.fields | map(attribute='name') | list | tojson }}"
   - name: create_record
+    title: Create a record
     description: Creates a record of an object with the given fields
     access: write
     input:
@@ -58,6 +161,7 @@ tools:
       fields: { type: object, description: "Field names and values" }
     request: { method: POST, path: "/sobjects/{object}", body: "{{fields}}" }
   - name: update_record
+    title: Update a record
     description: Changes fields of one record
     access: write
     input:
@@ -66,6 +170,7 @@ tools:
       fields: { type: object, description: "Field names and their new values" }
     request: { method: PATCH, path: "/sobjects/{object}/{id}", body: "{{fields}}" }
   - name: upsert_record
+    title: Create or update by key
     description: Creates or changes the record whose external key field holds the key
     access: write
     input:
@@ -75,15 +180,32 @@ tools:
       fields: { type: object, description: "Field names and values" }
     request: { method: PATCH, path: "/sobjects/{object}/{key_field}/{key}", body: "{{fields}}" }
   - name: list_articles
+    title: List Knowledge articles
     description: Published Knowledge articles changed since a time, a page at a time
     access: read
     knowledge: list_items
     rate_limit_per_min: 60
-    function: ops_plugin_salesforce.kb:list_articles
     input:
-      since: { type: string, required: false, description: "Only articles changed after this time" }
+      since:
+        { type: string, format: date-time, required: false, default: "1970-01-01T00:00:00Z", description: "Only articles changed after this time" }
       cursor: { type: string, required: false, description: "The page after the one that gave it" }
+    request:
+      method: GET
+      path: /query
+      query:
+        q: >-
+          SELECT Id, Title, LastModifiedDate FROM Knowledge__kav
+          WHERE PublishStatus = 'Online' AND LastModifiedDate > {{since}} ORDER BY LastModifiedDate, Id
+      paging: { rule: link, next: nextRecordsUrl }
+    transform: >-
+      {%- set items = [] -%}
+      {%- for a in data.records -%}
+      {%- set _ = items.append({"id": a.Id, "title": a.Title, "updated_at": a.LastModifiedDate}) -%}
+      {%- endfor -%}
+      {%- if data.done and items -%}{{ {"items": items, "watermark": items[-1].updated_at} | tojson }}
+      {%- else -%}{{ {"items": items} | tojson }}{%- endif -%}
   - name: get_article
+    title: Get a Knowledge article
     description: One Knowledge article or attachment, as a knowledge item
     access: read
     knowledge: get_item
