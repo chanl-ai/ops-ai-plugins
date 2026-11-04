@@ -3,7 +3,7 @@
 schema: ops-ai/plugin@2
 id: opsai.salesforce
 title: Salesforce
-version: 0.1.0
+version: 0.2.0
 sdk: "1"
 
 # What the console's Connections card shows: a mark, a category, one line, and where an admin sets up the app.
@@ -20,7 +20,7 @@ connection:
   revoke_url: "{login_url}/revoke"
   scopes:
     - { id: openid, label: "Know which account signed in", required: true }
-    - { id: api, label: "Read and change records", required: true }
+    - { id: api, label: "Records, with the signed-in user's permissions", required: true }
     - { id: refresh_token, label: "Stay signed in", required: true }
   sign_in: [team, person, person_or_team]
   # After sign-in, Salesforce's UserInfo endpoint on the sign-in host names the org's My Domain address in
@@ -28,10 +28,47 @@ connection:
   # Salesforce's host is safe to accept. A person whose sign-in lands in another org is refused.
   after_sign_in: { url: /services/oauth2/userinfo, read: urls.custom_domain, setting: instance_url }
   token_hosts: [.my.salesforce.com, .my.salesforce.test]
+  # What a refused sign-in says, by the code Salesforce sends back on the redirect or the token exchange. Its own screen
+  # reads OAUTH_APPROVAL_ERROR_GENERIC whatever the cause; the redirect carries the real one.
+  sign_in_errors:
+    - error: invalid_client
+      description_contains: must be installed
+      say: Your Salesforce admin needs to install Ops AI's app in your org first.
+      who: admin
+    - error: OAUTH_APP_BLOCKED
+      say: Your Salesforce admin has blocked Ops AI's app. Ask them to allow it.
+      who: admin
+    - error: invalid_app_access
+      say: Your Salesforce admin needs to give you access to Ops AI's app (Manage Connected Apps, then your profile or permission set).
+      who: admin
+    # The org's edition has no API (Professional without the add-on), or the user lacks API Enabled.
+    - error: API_DISABLED_FOR_ORG
+      say: This Salesforce user cannot use the API. It needs the API Enabled permission, which Professional edition does not include.
+      who: admin
+    - error: API_CURRENTLY_DISABLED
+      say: This Salesforce user cannot use the API. It needs the API Enabled permission, which Professional edition does not include.
+      who: admin
+    - error: access_denied
+      say: Access was not given in Salesforce. Connect again to retry.
+      who: person
   health_check: { path: "/services/data/v{api_version}/limits" }
 
 settings:
-  login_url: { type: string, default: "https://login.salesforce.com/services/oauth2", title: Sign-in address }
+  login_url:
+    type: string
+    title: Where do you sign in to Salesforce?
+    default: "https://login.salesforce.com/services/oauth2"
+    choices:
+      - { value: "https://login.salesforce.com/services/oauth2", label: login.salesforce.com, hint: Production and developer orgs }
+      - { value: "https://test.salesforce.com/services/oauth2", label: test.salesforce.com, hint: Orgs used for testing, test_account: true }
+    # A company's My Domain. `.test` can never be registered (RFC 2606), so the fake Salesforce's host is safe to take.
+    other:
+      label: Your company's address
+      hint: Your Salesforce My Domain
+      placeholder: acme.my.salesforce.com
+      value: "https://{host}/services/oauth2"
+      hosts: [.my.salesforce.com, .my.salesforce.test]
+      test_account_hosts: [.sandbox.my.salesforce.com]
   instance_url: { type: string, title: Instance, after_sign_in: true }
   api_version: { type: string, default: "61.0", title: API version, lockable: true }
   article_body_field: { type: string, default: Body__c, title: Article body field }
