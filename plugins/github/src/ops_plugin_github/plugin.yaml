@@ -2,7 +2,7 @@
 schema: ops-ai/plugin@2
 id: opsai.github
 title: GitHub
-version: 0.1.0
+version: 0.2.0
 sdk: "1"
 
 display:
@@ -20,6 +20,23 @@ connection:
     - { id: "read:user", label: "Know which account signed in", required: true }
   sign_in: [team, person, person_or_team]
   health_check: { path: /user }
+  # What a refused sign-in says, by the code GitHub sends back on the redirect or the token exchange.
+  sign_in_errors:
+    - error: access_denied
+      say: Access was not given in GitHub. Connect again to retry.
+      who: person
+    - error: redirect_uri_mismatch
+      say: "{credential} does not list Ops AI's return address. Add it as the OAuth app's callback URL in GitHub."
+      who: admin
+    - error: application_suspended
+      say: "{credential} is suspended in GitHub. Its owner restores it under the OAuth app's settings."
+      who: admin
+    - error: incorrect_client_credentials
+      say: The client secret for {credential} is wrong. Replace it on its Credentials page.
+      who: admin
+    - error: bad_verification_code
+      say: The GitHub sign-in expired before it finished. Connect again.
+      who: person
 
 settings:
   web_url: { type: string, default: "https://github.com", title: Sign-in address }
