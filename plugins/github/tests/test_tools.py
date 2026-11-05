@@ -42,9 +42,6 @@ def test_list_issues_sends_the_state_and_answers_the_fields_an_agent_needs(gh: t
     assert first["url"] == "https://github.test/acme-logistics/dispatch-api/issues/3"
 
 
-@pytest.mark.xfail(
-    strict=True, reason="ops_plugin_sdk.testing.call leaves out an input's default; tools-service fills it (plugins.md)"
-)
 def test_list_issues_defaults_to_open(gh: tuple[FakeGitHub, Fake]) -> None:
     fake, client = gh
     out: dict[str, Any] = call(plugin, "list_issues", REPO, SETTINGS, client)
