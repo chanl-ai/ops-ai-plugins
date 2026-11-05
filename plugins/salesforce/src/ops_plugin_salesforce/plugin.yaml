@@ -57,6 +57,8 @@ settings:
   login_url:
     type: string
     title: Where do you sign in to Salesforce?
+    # The org is the app registration's: every account on one auth config signs in at the same place.
+    asked: config
     default: "https://login.salesforce.com/services/oauth2"
     choices:
       - { value: "https://login.salesforce.com/services/oauth2", label: login.salesforce.com, hint: Production and developer orgs }
