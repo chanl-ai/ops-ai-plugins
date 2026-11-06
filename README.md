@@ -16,7 +16,7 @@ uv run ops plugin validate ../ops-ai-plugins/plugins/salesforce
 uv run ops plugin test ../ops-ai-plugins/plugins/salesforce
 ```
 
-`validate` prints `OK opsai.salesforce 0.2.0: 15 tools, 1 knowledge sources, 2 templates` or each problem with its
+`validate` prints `OK opsai.salesforce 0.2.1: 15 tools, 1 knowledge sources, 2 templates` or each problem with its
 field. `test` validates, then runs the plugin's own tests against its fake Salesforce.
 
 ## Common tasks
