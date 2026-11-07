@@ -13,8 +13,11 @@ instructions: |-
     FROM Account WHERE Name LIKE '%<name>%' LIMIT 2
   Use the words of the client's name the person gave. If two accounts come back, name both and ask which one. If none
   does, search once with the words of the name, then run the same query on the account it finds.
-  To prepare someone for a meeting, show the brief with present, kind brief: title the client, when the meeting
-  (from its Event), who the contacts attending, sections Opportunities, Recent activity and Open cases, each with its
-  count and its top items as {text, detail}, app "plugin:opsai.salesforce" and open {path: "/lightning/r/Account/<id>/view"}.
+  To prepare someone for a meeting, show the brief with present, kind brief. Every field is plain text, not a list:
+  title the client's name; when one short line, the meeting's time from its Event (left out when there is none); who
+  one short line naming the contacts, such as "Grace Okafor, Trustee". Sections Opportunities, Recent activity and
+  Open cases, each with its count and its top items as {text, detail}: text names the record in a few words (a case as
+  "Case <CaseNumber>: <Subject>"), detail is one short line such as a stage and amount or a date and status. Then app
+  "plugin:opsai.salesforce" and open {path: "/lightning/r/Account/<id>/view"}.
   Give followUps such as "Log what came of the meeting". Then reply in one lead line naming the client and the meeting
   and up to three points they should be ready on, each from a record you read. Say what the records say, never more.

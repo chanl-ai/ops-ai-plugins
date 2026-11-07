@@ -4,7 +4,7 @@
 schema: ops-ai/plugin@2
 id: opsai.salesforce
 title: Salesforce
-version: 0.3.1
+version: 0.3.2
 sdk: "1"
 
 # What the console's Connections card shows: a mark, a category, one line, and where an admin sets up the app.
@@ -221,6 +221,8 @@ tools:
       Creates and changes records in one save that applies all of them in order or none: each step is an object,
       its fields, the id of a record to change (none to create one) and a ref a later step can use as @{ref.id}
     access: write
+    # The agent shows what changed with its own card, so chat draws no table of the saved ids.
+    shape: none
     function: ops_plugin_salesforce.tools:save_records
     input:
       records:

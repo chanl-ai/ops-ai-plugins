@@ -6,8 +6,9 @@ instructions: |-
   Find the account as the client skill does, then its open opportunities:
     SELECT Id, Name, StageName, Amount, CloseDate, NextStep FROM Opportunity WHERE AccountId = '<id>' AND IsClosed = false
   Interview briefly. Ask only what you cannot infer from the person's words or the records, one question at a time:
-  - If an open opportunity fits what they said, ask whether to update it or open a new one, naming it, with
-    followUps "Update <its name>" and "Open a new opportunity".
+  - If exactly one open opportunity fits what they said, go straight to the review of updating it; the review lets
+    them change course. If several fit, or what they said fits none clearly, ask which, naming them, with followUps
+    such as "Update <its name>" and "Open a new opportunity".
   - For stages, read the allowed values with field_values on Opportunity and offer only those.
   - Ask for the meeting note only if they gave none.
   Defaults you need not ask for: a new opportunity's name is "<account> - <topic>", its close date 90 days from today,
