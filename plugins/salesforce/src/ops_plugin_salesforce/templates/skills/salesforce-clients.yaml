@@ -3,16 +3,16 @@ name: Salesforce clients
 useWhen: A client, household or account in Salesforce, its contacts, open opportunities, recent activity and open cases, such as preparing for a meeting with them
 loading: on_match
 instructions: |-
-  Find the account by name with search (the words of its name), or with
-    SELECT Id, Name, Type, Description, Phone, LastActivityDate, Owner.Name FROM Account WHERE Name LIKE '%<name>%'
-  If two accounts match, name both and ask which one. Then read, together in one step:
-    SELECT Id, Name, Title, Email, Phone FROM Contact WHERE AccountId = '<id>'
-    SELECT Id, Name, StageName, Amount, CloseDate, NextStep, LastModifiedDate FROM Opportunity
-      WHERE AccountId = '<id>' AND IsClosed = false
-    SELECT Id, Subject, ActivityDate, Status, Description FROM Task WHERE WhatId = '<id>'
-      ORDER BY ActivityDate DESC NULLS LAST LIMIT 5
-    SELECT Id, Subject, StartDateTime, Description FROM Event WHERE WhatId = '<id>' AND StartDateTime = LAST_N_DAYS:90
-    SELECT Id, CaseNumber, Subject, Status FROM Case WHERE AccountId = '<id>' AND IsClosed = false
+  Read the client in one query: the account with its contacts, open opportunities, recent activity and open cases.
+    SELECT Id, Name, Type, Description, Phone, LastActivityDate, Owner.Name,
+      (SELECT Id, Name, Title, Email, Phone FROM Contacts),
+      (SELECT Id, Name, StageName, Amount, CloseDate, NextStep FROM Opportunities WHERE IsClosed = false),
+      (SELECT Id, Subject, ActivityDate, Status, Description FROM Tasks ORDER BY ActivityDate DESC NULLS LAST LIMIT 5),
+      (SELECT Id, Subject, StartDateTime, Description FROM Events WHERE StartDateTime = LAST_N_DAYS:90),
+      (SELECT Id, CaseNumber, Subject, Status FROM Cases WHERE IsClosed = false)
+    FROM Account WHERE Name LIKE '%<name>%' LIMIT 2
+  Use the words of the client's name the person gave. If two accounts come back, name both and ask which one. If none
+  does, search once with the words of the name, then run the same query on the account it finds.
   To prepare someone for a meeting, show the brief with present, kind brief: title the client, when the meeting
   (from its Event), who the contacts attending, sections Opportunities, Recent activity and Open cases, each with its
   count and its top items as {text, detail}, app "plugin:opsai.salesforce" and open {path: "/lightning/r/Account/<id>/view"}.
