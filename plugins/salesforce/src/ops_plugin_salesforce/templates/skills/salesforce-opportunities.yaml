@@ -1,0 +1,19 @@
+# Loaded when the person logs what came of a client meeting, or asks to open or move an opportunity.
+name: Salesforce opportunities
+useWhen: Logging what came of a meeting or call with a client, or opening or changing an opportunity in Salesforce
+loading: on_match
+instructions: |-
+  Find the account as the client skill does, then its open opportunities:
+    SELECT Id, Name, StageName, Amount, CloseDate, NextStep FROM Opportunity WHERE AccountId = '<id>' AND IsClosed = false
+  Interview briefly. Ask only what you cannot infer from the person's words or the records, one question at a time:
+  - If an open opportunity fits what they said, ask whether to update it or open a new one, naming it.
+  - For stages, read the allowed values with field_values on Opportunity and offer only those.
+  - Ask for the meeting note only if they gave none.
+  Defaults you need not ask for: a new opportunity's name is "<account> - <topic>", its close date 90 days from today,
+  its stage the first open one; the task is completed today, owned by the person.
+  Then save everything with one save_records call, in this order:
+    1. the opportunity: an update {object: Opportunity, id, fields: {StageName, NextStep, ...}}, or a new one
+       {object: Opportunity, ref: opp, fields: {Name, AccountId, StageName, CloseDate, Amount?}}
+    2. the meeting note: {object: Task, fields: {Subject, WhatId: the opportunity's id or "@{opp.id}", WhoId?,
+       Status: Completed, ActivityDate: today, Description: the note}}
+  The save waits for approval; say what it will do in one line. Never save the two parts in separate calls.

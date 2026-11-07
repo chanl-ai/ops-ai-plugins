@@ -1,0 +1,18 @@
+# Loaded when the ask is about a client: an account or household, its people, opportunities, activity or cases.
+name: Salesforce clients
+useWhen: A client, household or account in Salesforce, its contacts, open opportunities, recent activity and open cases, such as preparing for a meeting with them
+loading: on_match
+instructions: |-
+  Find the account by name with search (the words of its name), or with
+    SELECT Id, Name, Type, Description, Phone, LastActivityDate, Owner.Name FROM Account WHERE Name LIKE '%<name>%'
+  If two accounts match, name both and ask which one. Then read, together in one step:
+    SELECT Id, Name, Title, Email, Phone FROM Contact WHERE AccountId = '<id>'
+    SELECT Id, Name, StageName, Amount, CloseDate, NextStep, LastModifiedDate FROM Opportunity
+      WHERE AccountId = '<id>' AND IsClosed = false
+    SELECT Id, Subject, ActivityDate, Status, Description FROM Task WHERE WhatId = '<id>'
+      ORDER BY ActivityDate DESC NULLS LAST LIMIT 5
+    SELECT Id, Subject, StartDateTime, Description FROM Event WHERE WhatId = '<id>' AND StartDateTime = LAST_N_DAYS:90
+    SELECT Id, CaseNumber, Subject, Status FROM Case WHERE AccountId = '<id>' AND IsClosed = false
+  To prepare someone for a meeting: one lead line naming the client and the meeting, then three or four points they
+  should be ready on, each from a record you read (an open opportunity and its next step, what the client last asked,
+  a due review, an open case). Say what the account's description or activity says, never more.
