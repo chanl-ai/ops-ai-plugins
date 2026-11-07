@@ -64,7 +64,8 @@ class Composite:
                             "errorCode": "PROCESSING_HALTED"
                             if i == 0
                             else "REQUIRED_FIELD_MISSING",
-                            "message": "Subject",
+                            "message": "Required fields are missing: [Subject]",
+                            "fields": ["Subject"],
                         }
                     ],
                 }
@@ -120,8 +121,9 @@ def test_an_update_patches_the_record_it_names() -> None:
     )
 
 
-def test_a_refused_step_saves_nothing_and_says_the_real_cause() -> None:
-    with pytest.raises(PluginError, match="Nothing was saved: Task: Subject"):
+def test_a_refused_step_saves_nothing_and_names_the_field_salesforce_refused() -> None:
+    # The review card marks the refused field, so the error must name it, not only Salesforce's sentence.
+    with pytest.raises(PluginError, match=r"Nothing was saved: Task Subject: Required fields are missing"):
         call(
             plugin,
             "save_records",

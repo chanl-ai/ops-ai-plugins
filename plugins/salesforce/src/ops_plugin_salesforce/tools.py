@@ -59,6 +59,11 @@ def _step(i: int, raw: Any, refs: set[str]) -> dict[str, Any]:
     return {"object": obj, "id": record, "fields": fields, "ref": ref}
 
 
+def _fields(error: dict[str, Any]) -> str:
+    names = [str(f) for f in cast(list[Any], error.get("fields") or []) if f]
+    return f" {', '.join(names)}" if names else ""
+
+
 @tool(access="write")
 def save_records(ctx: Context, records: list[Any]) -> Any:
     """Creates and changes records in order, all or none: each step is {object, fields, id?, ref?}; a step with an id
@@ -100,8 +105,10 @@ def save_records(ctx: Context, records: list[Any]) -> Any:
             errors = cast(list[dict[str, Any]], got if isinstance(got, list) else [])
             # PROCESSING_HALTED marks the steps not applied because another failed; the cause is the other one.
             real = [e for e in errors if e.get("errorCode") != "PROCESSING_HALTED"]
+            # Salesforce names the fields it refused, so the review can mark each one.
             failed += [
-                f"{s['object']}: {e.get('message') or e.get('errorCode')}" for e in real
+                f"{s['object']}{_fields(e)}: {e.get('message') or e.get('errorCode')}"
+                for e in real
             ]
             continue
         made = cast(dict[str, Any], got).get("id") if isinstance(got, dict) else None
