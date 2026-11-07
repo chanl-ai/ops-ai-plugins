@@ -244,6 +244,14 @@ tools:
       id: { type: string, description: "The record id" }
       fields: { type: object, description: "Field names and their new values" }
     request: { method: PATCH, path: "/sobjects/{object}/{id}", body: "{{fields}}" }
+  - name: delete_record
+    title: Delete a record
+    description: Deletes one record; Salesforce keeps it in its recycle bin, and deleting an account deletes its contacts, opportunities and activities with it
+    access: write
+    input:
+      object: { type: string, description: "The object, such as Account" }
+      id: { type: string, description: "The record id" }
+    request: { method: DELETE, path: "/sobjects/{object}/{id}" }
   - name: upsert_record
     title: Create or update by key
     description: Creates or changes the record whose external key field holds the key

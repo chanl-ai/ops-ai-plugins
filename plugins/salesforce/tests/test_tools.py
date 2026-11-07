@@ -77,6 +77,8 @@ class FakeSalesforce:
             return httpx.Response(200, json={"done": True, "records": [{"Id": "500A", "CaseNumber": "00044818"}]})
         if path == f"{API}/sobjects/Case/describe":
             return httpx.Response(200, json={"fields": [{"name": "Id"}, {"name": "Status"}]})
+        if path == f"{API}/sobjects/Account/001A" and request.method == "DELETE":
+            return httpx.Response(204)
         if path == f"{API}/sobjects/Case/500A" and request.method == "PATCH":
             return httpx.Response(204)
         if path == f"{API}/sobjects/Knowledge__kav/ka1":
@@ -107,6 +109,13 @@ def test_update_sends_only_the_fields(sf: tuple[FakeSalesforce, Fake]) -> None:
     fake, client = sf
     call(plugin, "update_record", {"object": "Case", "id": "500A", "fields": {"Status": "Escalated"}}, SETTINGS, client)
     assert fake.seen[-1].method == "PATCH" and json.loads(fake.seen[-1].content) == {"Status": "Escalated"}
+
+
+def test_delete_sends_a_delete_to_the_record_and_nothing_else(sf: tuple[FakeSalesforce, Fake]) -> None:
+    fake, client = sf
+    call(plugin, "delete_record", {"object": "Account", "id": "001A"}, SETTINGS, client)
+    sent = fake.seen[-1]
+    assert sent.method == "DELETE" and sent.url.path.endswith("/sobjects/Account/001A") and not sent.content
 
 
 def test_the_listing_follows_next_records_url_and_ends_with_a_watermark(sf: tuple[FakeSalesforce, Fake]) -> None:
