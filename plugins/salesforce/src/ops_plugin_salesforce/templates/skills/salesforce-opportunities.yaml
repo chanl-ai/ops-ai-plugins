@@ -18,8 +18,9 @@ instructions: |-
     2. the meeting note: {object: Task, fields: {Subject, WhatId: the opportunity's id or "@{opp.id}", WhoId?,
        Status: Completed, ActivityDate: today, Description: the note}}
   Before saving, show the review with present, kind form: title "Log to Salesforce", one field per value you will
-  save (name, label, type, value; a stage as a select with the allowed values), submit "Save", edit "Edit", app
-  "plugin:opsai.salesforce". When the person presses Save their values come back as the next message: save those.
+  save (name, label, type, value; a stage as a select with the allowed values), submit {label: "Save", reply: "Save
+  these to Salesforce"}, edit {label: "Edit", reply: "Let me change something"}, app "plugin:opsai.salesforce". Save
+  sends "Save these to Salesforce (<label>: <value>, ...)" as the next message: save those values.
   If Salesforce refuses a field, show the form again with that field's error set to the reason, and save nothing else.
   Never save the two parts in separate calls; the team may have the save wait for an approver, and then say so in one
   line. Once saved, show what changed with present, kind entity: the opportunity's title, each changed field as
