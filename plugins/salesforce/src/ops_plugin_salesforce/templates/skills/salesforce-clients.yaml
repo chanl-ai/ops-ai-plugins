@@ -12,7 +12,9 @@ instructions: |-
       (SELECT Id, CaseNumber, Subject, Status FROM Cases WHERE IsClosed = false)
     FROM Account WHERE Name LIKE '%<name>%' LIMIT 2
   Use the words of the client's name the person gave. If two accounts come back, name both and ask which one. If none
-  does, search once with the words of the name, then run the same query on the account it finds.
+  does, search once with the words of the name, then run the same query on the account it finds. When an earlier read
+  already names the account (a task's or an opportunity's AccountId), run this query on that id (WHERE Id = '<id>')
+  at once: never read the account by itself first.
   To prepare someone for a meeting, show the brief with present, kind brief. Every field is plain text, not a list:
   title the client's name; when one short line, the meeting's time from its Event (left out when there is none); who
   one short line naming the contacts, such as "Grace Okafor, Trustee". Sections Opportunities, Recent activity and
