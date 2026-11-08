@@ -4,7 +4,7 @@
 schema: ops-ai/plugin@2
 id: opsai.salesforce
 title: Salesforce
-version: 0.3.3
+version: 0.3.4
 sdk: "1"
 
 # What the console's Connections card shows: a mark, a category, one line, and where an admin sets up the app.
