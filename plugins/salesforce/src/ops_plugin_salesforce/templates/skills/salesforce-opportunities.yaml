@@ -3,27 +3,36 @@ name: Salesforce opportunities
 useWhen: Logging what came of a meeting or call with a client, or opening or changing an opportunity in Salesforce
 loading: on_match
 instructions: |-
-  Find the account as the client skill does, then its open opportunities:
+  Find the account as the client skill does, then its open opportunities, unless an earlier read in this conversation
+  already holds them:
     SELECT Id, Name, StageName, Amount, CloseDate, NextStep FROM Opportunity WHERE AccountId = '<id>' AND IsClosed = false
-  Interview briefly. Ask only what you cannot infer from the person's words or the records, one question at a time:
-  - If exactly one open opportunity fits what they said, go straight to the review of updating it; the review lets
-    them change course. If several fit, or what they said fits none clearly, ask which, naming them, with followUps
-    such as "Update <its name>" and "Open a new opportunity".
-  - For stages, read the allowed values with field_values on Opportunity and offer only those.
-  - Ask for the meeting note only if they gave none.
+  Then work it out in short questions, which a person on the road answers with one tap. Ask only what you cannot
+  infer from their words or the records, one question per reply, and give each question its likely answers as
+  followUps (at most three), taken from the data:
+  - Which opportunity, only when there is a real choice: followUps "Update <its name>" and "New opportunity". With one
+    open opportunity that fits, use it without asking.
+  - The stage, when they did not say it plainly: read the allowed values with field_values on Opportunity and offer
+    the likeliest of those values.
+  - The amount, when it is unclear: followUps such as "Same amount" and the amount their words suggest.
+  - The close date, when it should move: two or three dates as followUps.
+  - The meeting note, only if they gave none.
   Defaults you need not ask for: a new opportunity's name is "<account> - <topic>", its close date 90 days from today,
   its stage the first open one; the task is completed today, owned by the person.
-  Then save everything with one save_records call, in this order:
+  When everything is known, read it back in one plain line naming the opportunity and each change, such as
+  "Update Education savings: stage Proposal/Price Quote, amount $75,000, and log the meeting note. Save?", with
+  followUps "Save", "Change something" and "Show as form".
+  If the person's preferences say they want forms for Salesforce updates, skip the questions and the read-back: show
+  the form at once. The form, and the answer to "Show as form": present, kind form: title "Log to Salesforce", one field
+  per value you will save (name, label, type, value; a stage as a select with the allowed values), submit {label:
+  "Save", reply: "Save these to Salesforce"}, edit {label: "Edit", reply: "Let me change something"}, app
+  "plugin:opsai.salesforce". Its Save sends "Save these to Salesforce (<label>: <value>, ...)": save those values.
+  On "Save", save everything with one save_records call, in this order:
     1. the opportunity: an update {object: Opportunity, id, fields: {StageName, NextStep, ...}}, or a new one
        {object: Opportunity, ref: opp, fields: {Name, AccountId, StageName, CloseDate, Amount?}}
     2. the meeting note: {object: Task, fields: {Subject, WhatId: the opportunity's id or "@{opp.id}", WhoId?,
        Status: Completed, ActivityDate: today, Description: the note}}
-  Before saving, show the review with present, kind form: title "Log to Salesforce", one field per value you will
-  save (name, label, type, value; a stage as a select with the allowed values), submit {label: "Save", reply: "Save
-  these to Salesforce"}, edit {label: "Edit", reply: "Let me change something"}, app "plugin:opsai.salesforce". Save
-  sends "Save these to Salesforce (<label>: <value>, ...)" as the next message: save those values.
-  If Salesforce refuses a field, show the form again with that field's error set to the reason, and save nothing else.
   Never save the two parts in separate calls; the team may have the save wait for an approver, and then say so in one
-  line. Once saved, show what changed with present, kind entity: the opportunity's title, each changed field as
-  {label, value, was} (was: the value before), status {text: "Saved", tone: success}, app as above and open
-  {path: "/lightning/r/Opportunity/<id>/view"}.
+  line. If Salesforce refuses a field, say which and why in one line and ask for the value again, saving nothing else.
+  Once saved, show what changed with present, kind entity: the opportunity's title, each field the save changed as
+  {label, value, was} (was: the value before), the meeting note as {label: "Meeting note", value: the note's text},
+  status {text: "Saved", tone: success}, app as above and open {path: "/lightning/r/Opportunity/<id>/view"}.
