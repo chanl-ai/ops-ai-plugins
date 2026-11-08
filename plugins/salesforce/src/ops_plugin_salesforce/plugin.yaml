@@ -4,7 +4,7 @@
 schema: ops-ai/plugin@2
 id: opsai.salesforce
 title: Salesforce
-version: 0.2.1
+version: 0.3.6
 sdk: "1"
 
 # What the console's Connections card shows: a mark, a category, one line, and where an admin sets up the app.
@@ -203,6 +203,32 @@ tools:
     input: { object: { type: string, description: "The object, such as Case" } }
     request: { method: GET, path: "/sobjects/{object}/describe" }
     transform: "{{ data.fields | map(attribute='name') | list | tojson }}"
+  - name: field_values
+    title: An object's allowed values
+    description: The values each picklist field of an object allows, such as an opportunity's stages
+    access: read
+    input: { object: { type: string, description: "The object, such as Opportunity" } }
+    request: { method: GET, path: "/sobjects/{object}/describe" }
+    transform: >-
+      {%- set out = {} -%}
+      {%- for f in data.fields if f.type == "picklist" -%}
+      {%- set _ = out.update({f.name: f.picklistValues | selectattr("active") | map(attribute="value") | list}) -%}
+      {%- endfor -%}
+      {{ out | tojson }}
+  - name: save_records
+    title: Save records together
+    description: >-
+      Creates and changes records in one save that applies all of them in order or none: each step is an object,
+      its fields, the id of a record to change (none to create one) and a ref a later step can use as @{ref.id}
+    access: write
+    # The agent shows what changed with its own card, so chat draws no table of the saved ids.
+    shape: none
+    function: ops_plugin_salesforce.tools:save_records
+    input:
+      records:
+        type: array
+        description: "The steps, in order: {object, fields, id?, ref?}"
+        items: { type: object }
   - name: create_record
     title: Create a record
     description: Creates a record of an object with the given fields
@@ -220,6 +246,14 @@ tools:
       id: { type: string, description: "The record id" }
       fields: { type: object, description: "Field names and their new values" }
     request: { method: PATCH, path: "/sobjects/{object}/{id}", body: "{{fields}}" }
+  - name: delete_record
+    title: Delete a record
+    description: Deletes one record; Salesforce keeps it in its recycle bin, and deleting an account deletes its contacts, opportunities and activities with it
+    access: write
+    input:
+      object: { type: string, description: "The object, such as Account" }
+      id: { type: string, description: "The record id" }
+    request: { method: DELETE, path: "/sobjects/{object}/{id}" }
   - name: upsert_record
     title: Create or update by key
     description: Creates or changes the record whose external key field holds the key
@@ -281,6 +315,22 @@ knowledge_sources:
     schedule: { kind: daily, time: "02:00" }
 
 templates:
+  # How the assistant uses Salesforce, loaded when an ask fits; each names the tools it reads and writes with.
+  - kind: skill
+    id: salesforce-meetings
+    version: 1
+    path: templates/skills/salesforce-meetings.yaml
+    requires: { tools: [query] }
+  - kind: skill
+    id: salesforce-clients
+    version: 1
+    path: templates/skills/salesforce-clients.yaml
+    requires: { tools: [search, query, get_record] }
+  - kind: skill
+    id: salesforce-opportunities
+    version: 1
+    path: templates/skills/salesforce-opportunities.yaml
+    requires: { tools: [search, query, field_values, save_records] }
   - kind: agent
     id: case-helper
     version: 1

@@ -1,0 +1,44 @@
+# Loaded when the person logs what came of a client meeting, or asks to open or move an opportunity.
+name: Salesforce opportunities
+useWhen: Logging what came of a meeting or call with a client, or opening or changing an opportunity in Salesforce
+loading: on_match
+instructions: |-
+  Unless an earlier read in this conversation already holds them, read the account and its open opportunities in one
+  query, and in the same step the allowed stages with field_values on Opportunity:
+    SELECT Id, Name, (SELECT Id, Name, StageName, Amount, CloseDate, NextStep FROM Opportunities WHERE IsClosed = false)
+    FROM Account WHERE Name LIKE '%<name>%' LIMIT 2
+  Then work it out in short questions, which a person on the road answers with one tap. Ask only what you cannot
+  infer from their words or the records, one question per reply, and give each question its likely answers as
+  followUps (at most three), taken from the data:
+  - Which opportunity, only when there is a real choice: followUps "Update <its name>" and "New opportunity". With one
+    open opportunity that fits, use it without asking.
+  - The stage: infer it when their words fix it. "Forward a stage" or "the next stage" is the value after the current
+    one in field_values' order; "won", "lost" or a named stage is that value. Ask only when it is open, with the
+    likeliest allowed values as followUps.
+  - The amount, when it is unclear: followUps such as "Same amount" and the amount their words suggest.
+  - The close date, when it should move: two or three dates as followUps.
+  - The meeting note, only if they gave none.
+  Defaults you need not ask for: a new opportunity's name is "<account> - <topic>", its close date 90 days from today,
+  its stage the first open one; the task is completed today, owned by the person.
+  Every reply in this flow ends with either one question and its followUps, or the read-back and its followUps; never
+  state the plan without one of them. When everything is known, read it back in one plain line naming the opportunity and each change, such as
+  "Update Education savings: stage Proposal/Price Quote, amount $75,000, and log the meeting note. Save?", with
+  followUps "Save", "Change something" and "Show as form".
+  If the person's preferences say they want forms for Salesforce updates, skip the questions and the read-back: show
+  the form at once. The form, and the answer to "Show as form": present, kind form: title "Log to Salesforce", one field
+  per value you will save (name, label, type, value; a stage as a select with the allowed values), submit {label:
+  "Save", reply: "Save these to Salesforce"}, edit {label: "Edit", reply: "Let me change something"}, app
+  "plugin:opsai.salesforce". Its Save sends "Save these to Salesforce (<label>: <value>, ...)": save those values.
+  Save only when your reply just before in this conversation was the read-back (or the form) of exactly the values you
+  will save, and the person answered it with Save. A "Save" with no such read-back before it, or an ask that says to
+  save in the same breath, gets the read-back first and nothing is written yet.
+  Then save everything with one save_records call, in this order:
+    1. the opportunity: an update {object: Opportunity, id, fields: {StageName, NextStep, ...}}, or a new one
+       {object: Opportunity, ref: opp, fields: {Name, AccountId, StageName, CloseDate, Amount?}}
+    2. the meeting note: {object: Task, fields: {Subject, WhatId: the opportunity's id or "@{opp.id}", WhoId?,
+       Status: Completed, ActivityDate: today, Description: the note}}
+  Never save the two parts in separate calls; the team may have the save wait for an approver, and then say so in one
+  line. If Salesforce refuses a field, say which and why in one line and ask for the value again, saving nothing else.
+  Once saved, show what changed with present, kind entity: the opportunity's title, each field the save changed as
+  {label, value, was} (was: the value before), the meeting note as {label: "Meeting note", value: the note's text},
+  status {text: "Saved", tone: success}, app as above and open {path: "/lightning/r/Opportunity/<id>/view"}.

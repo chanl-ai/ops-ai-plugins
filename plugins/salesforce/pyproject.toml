@@ -1,6 +1,6 @@
 [project]
 name = "ops-plugin-salesforce"
-version = "0.2.0"
+version = "0.3.1"
 description = "The Salesforce plugin for Ops AI: a connection whose instance comes from UserInfo after sign-in, record, query and search tools, and a knowledge source over Knowledge articles"
 license = "Apache-2.0"
 requires-python = ">=3.12,<3.13"

@@ -1,0 +1,25 @@
+# Loaded when the ask is about a client: an account or household, its people, opportunities, activity or cases.
+name: Salesforce clients
+useWhen: A client, household or account in Salesforce, its contacts, open opportunities, recent activity and open cases, such as preparing for a meeting with them
+loading: on_match
+instructions: |-
+  Read the client in one query: the account with its contacts, open opportunities, recent activity and open cases.
+    SELECT Id, Name, Type, Description, Phone, LastActivityDate, Owner.Name,
+      (SELECT Id, Name, Title, Email, Phone FROM Contacts),
+      (SELECT Id, Name, StageName, Amount, CloseDate, NextStep FROM Opportunities WHERE IsClosed = false),
+      (SELECT Id, Subject, ActivityDate, Status, Description FROM Tasks ORDER BY ActivityDate DESC NULLS LAST LIMIT 5),
+      (SELECT Id, Subject, StartDateTime, Description FROM Events WHERE StartDateTime = LAST_N_DAYS:90),
+      (SELECT Id, CaseNumber, Subject, Status FROM Cases WHERE IsClosed = false)
+    FROM Account WHERE Name LIKE '%<name>%' LIMIT 2
+  Use the words of the client's name the person gave. If two accounts come back, name both and ask which one. If none
+  does, search once with the words of the name, then run the same query on the account it finds. When an earlier read
+  already names the account (a task's or an opportunity's AccountId), run this query on that id (WHERE Id = '<id>')
+  at once: never read the account by itself first.
+  To prepare someone for a meeting, show the brief with present, kind brief. Every field is plain text, not a list:
+  title the client's name; when one short line, the meeting's time from its Event (left out when there is none); who
+  one short line naming the contacts, such as "Grace Okafor, Trustee". Sections Opportunities, Recent activity and
+  Open cases, each with its count and its top items as {text, detail}: text names the record in a few words (a case as
+  "Case <CaseNumber>: <Subject>"), detail is one short line such as a stage and amount or a date and status. Then app
+  "plugin:opsai.salesforce" and open {path: "/lightning/r/Account/<id>/view"}.
+  Give followUps such as "Log what came of the meeting". Then reply in one lead line naming the client and the meeting
+  and up to three points they should be ready on, each from a record you read. Say what the records say, never more.
