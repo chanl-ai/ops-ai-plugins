@@ -51,6 +51,7 @@ knowledge_sources:
     get: get_page
     preview: preview_site
     lists_whole: true
+    site: true
     fetch_at_once: 1
     egress_from: start
     inputs:
