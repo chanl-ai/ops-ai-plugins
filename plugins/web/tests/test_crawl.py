@@ -237,3 +237,9 @@ def test_an_off_site_or_broken_sitemap_is_skipped_with_its_reason_and_the_rest_i
     assert rows[f"{SITE}/sitemap-broken.xml"]["skipped"] == "The sitemap answered 500."
     assert "skipped" not in rows[f"{SITE}/lending/payment-holidays"], "the good sitemap is still read"
     assert not any(r.url.host == "elsewhere.test" for r in site.seen)
+
+
+def test_the_listing_says_the_pace_the_page_fetches_keep_to(site: FakeSite) -> None:
+    site.robots = "User-agent: *\nCrawl-delay: 3\n"
+    out = call(plugin, "list_pages", {"source": {"start": [f"{SITE}/start"], "rate": 5}}, {}, fake(site))
+    assert out["pace_s"] == 3.0, out.get("pace_s")

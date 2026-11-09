@@ -333,7 +333,9 @@ def _is_sitemap(url: str) -> bool:
     return path.endswith(".xml") or path.endswith(".xml.gz") or "sitemap" in path
 
 
-def walk(ctx: Context, site: Site, state: Walk | None, *, content: bool) -> tuple[list[dict[str, Any]], Walk | None]:
+def walk(
+    ctx: Context, site: Site, state: Walk | None, *, content: bool
+) -> tuple[list[dict[str, Any]], Walk | None, float]:
     """One call's share of a listing: rows for the pages found (skipped ones with their reason), and where the next
     call carries on (None when the listing is done). With `content`, a page read to follow its links carries its
     content, so it is not fetched again."""
@@ -412,7 +414,7 @@ def walk(ctx: Context, site: Site, state: Walk | None, *, content: bool) -> tupl
     if capped:
         rows.append({"id": f"{site.root}#capped", "title": "Page cap", "updated_at": state.started,
                      "skipped": f"Stopped at {site.max_pages} pages, the source's cap."})  # fmt: skip
-    return rows, None if done or capped else state
+    return rows, None if done or capped else state, fetch.interval
 
 
 def _content(url: str, r: Response, page: _Page | None = None) -> dict[str, Any]:
@@ -438,8 +440,10 @@ def list_pages(
     del since
     site = site_of(source)
     state = Walk(**json.loads(cursor)) if cursor else None
-    rows, after = walk(ctx, site, state, content=True)
-    out: dict[str, Any] = {"items": rows}
+    rows, after, pace = walk(ctx, site, state, content=True)
+    # The seconds between two requests to the site (its rate, or robots.txt's Crawl-delay when slower): the fetches of
+    # changed pages that follow, one call each, keep to it too.
+    out: dict[str, Any] = {"items": rows, "pace_s": pace}
     if after is not None:
         out["next_cursor"] = after.dump()
     return out
@@ -479,7 +483,7 @@ def preview_site(ctx: Context, source: dict[str, Any]) -> dict[str, Any]:
     """The first pages the source would take in, each with its outcome; the first few that would be fetched are read
     to flag those that show their text only with JavaScript. Nothing is stored."""
     site = site_of(source)
-    rows, after = walk(ctx, site, None, content=False)
+    rows, after, _ = walk(ctx, site, None, content=False)
     fetch = Fetcher(ctx, site)
     pages: list[dict[str, Any]] = []
     checked = 0
