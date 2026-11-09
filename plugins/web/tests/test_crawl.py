@@ -49,6 +49,10 @@ class FakeSite:
         self.lastmod = {"/lending/early-repayment": "2026-11-01", "/lending/payment-holidays": "2026-11-02"}
         self.seen: list[httpx.Request] = []
         self.times: list[float] = []
+        # path -> (status, Location): a redirect the site answers before the real answer.
+        self.redirects: dict[str, tuple[int, str]] = {}
+        self.robots = f"User-agent: *\nDisallow: /admin/\n\nSitemap: {SITE}/sitemap-index.xml\n"
+        self.broken: dict[str, httpx.Response] = {}
 
     def etag(self, path: str) -> str:
         return f'"{abs(hash(self.pages[path])) % 10**8}"'
@@ -57,8 +61,13 @@ class FakeSite:
         self.seen.append(request)
         self.times.append(time.monotonic())
         path = request.url.path
+        if path in self.redirects:
+            status, location = self.redirects[path]
+            return httpx.Response(status, headers={"location": location})
+        if path in self.broken:
+            return self.broken[path]
         if path == "/robots.txt":
-            return httpx.Response(200, text=f"User-agent: *\nDisallow: /admin/\n\nSitemap: {SITE}/sitemap-index.xml\n")
+            return httpx.Response(200, text=self.robots)
         if path == "/sitemap-index.xml":
             return httpx.Response(
                 200, text=f"<sitemapindex><sitemap><loc>{SITE}/sitemap-lending.xml</loc></sitemap></sitemapindex>"
@@ -185,3 +194,46 @@ def test_the_plugin_keeps_the_knowledge_source_contract(site: FakeSite) -> None:
 
     problems = knowledge_contract(plugin, "site", fake(site), settings={}, values=SOURCE, change=change, delete=delete)
     assert problems == [], problems
+
+
+def test_a_redirected_robots_txt_is_obeyed(site: FakeSite) -> None:
+    """A robots.txt moved behind a redirect was read as missing, which allows everything."""
+    site.redirects["/robots.txt"] = (301, "/policies/robots.txt")
+    site.pages["/policies/robots.txt"] = "User-agent: *\nDisallow: /lending/\n"
+    rows = {r["id"]: r for r in listed(site, {"start": [f"{SITE}/lending/early-repayment"], "rate": 5})}
+    assert rows[f"{SITE}/lending/early-repayment"]["skipped"] == "Refused by robots.txt", rows
+
+
+def test_a_page_redirected_on_the_site_is_fetched_where_it_ends_and_one_off_the_site_is_refused(
+    site: FakeSite,
+) -> None:
+    site.redirects["/loans/early"] = (301, "/lending/early-repayment")
+    moved = call(plugin, "get_page", {"source": SOURCE, "id": f"{SITE}/loans/early"}, {}, fake(site))
+    assert moved["id"] == f"{SITE}/loans/early" and moved["url"] == f"{SITE}/lending/early-repayment", moved
+    assert "repay all or part" in moved["content"]
+    site.redirects["/away"] = (302, "https://elsewhere.test/x")
+    with pytest.raises(Exception, match=r"off help\.northbank\.test"):
+        call(plugin, "get_page", {"source": SOURCE, "id": f"{SITE}/away"}, {}, fake(site))
+    assert not any(r.url.host == "elsewhere.test" for r in site.seen)
+
+
+def test_a_sixth_redirect_stops(site: FakeSite) -> None:
+    for n in range(7):
+        site.redirects[f"/hop{n}"] = (302, f"/hop{n + 1}")
+    with pytest.raises(Exception, match="more than 5 times"):
+        call(plugin, "get_page", {"source": SOURCE, "id": f"{SITE}/hop0"}, {}, fake(site))
+    assert sum(1 for r in site.seen if r.url.path.startswith("/hop")) == 6
+
+
+def test_an_off_site_or_broken_sitemap_is_skipped_with_its_reason_and_the_rest_is_listed(site: FakeSite) -> None:
+    site.robots = (
+        "User-agent: *\nSitemap: https://elsewhere.test/sitemap.xml\nSitemap: not a url\n"
+        f"Sitemap: {SITE}/sitemap-broken.xml\nSitemap: {SITE}/sitemap-index.xml\n"
+    )
+    site.broken["/sitemap-broken.xml"] = httpx.Response(500)
+    rows = {r["id"]: r for r in listed(site)}
+    assert "another site" in rows["https://elsewhere.test/sitemap.xml"]["skipped"], rows
+    assert "not an address" in rows["not a url"]["skipped"]
+    assert rows[f"{SITE}/sitemap-broken.xml"]["skipped"] == "The sitemap answered 500."
+    assert "skipped" not in rows[f"{SITE}/lending/payment-holidays"], "the good sitemap is still read"
+    assert not any(r.url.host == "elsewhere.test" for r in site.seen)

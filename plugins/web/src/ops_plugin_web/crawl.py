@@ -46,6 +46,10 @@ PREVIEW_PAGES = 50
 # The preview reads this many pages to see which show their text only with JavaScript.
 JS_CHECK = 10
 JS_MIN_CHARS = 200
+# Redirects followed per request, each hop back through the context (so the egress check applies to every hop), on
+# the source's own site only.
+MAX_REDIRECTS = 5
+REDIRECTS = (301, 302, 303, 307, 308)
 TEXT_TYPES = ("text/html", "application/xhtml+xml", "text/plain", "text/markdown")
 
 
@@ -152,7 +156,7 @@ class Fetcher:
     def time_left(self) -> bool:
         return time.monotonic() - self.started < BUDGET_S - self.interval
 
-    def get(self, url: str, headers: dict[str, str] | None = None) -> Response:
+    def _one(self, url: str, headers: dict[str, str] | None) -> Response:
         wait = self.last + self.interval - time.monotonic()
         if self.last and wait > 0:
             time.sleep(wait)
@@ -162,12 +166,36 @@ class Fetcher:
             raise RateLimited(f"{self.site.host} answered 503; it asks to be read later.")
         return r
 
+    def get(self, url: str, headers: dict[str, str] | None = None) -> Response:
+        """The answer at `url` after its redirects (up to MAX_REDIRECTS, each one paced like any request); `final`
+        says where it came from. A redirect off the site, or one hop too many, raises OffSite with the reason."""
+        self.final = url
+        for _ in range(MAX_REDIRECTS + 1):
+            r = self._one(self.final, headers)
+            location = r.headers.get("location") or r.headers.get("Location")
+            if r.status_code not in REDIRECTS or not location:
+                return r
+            target = normal(urljoin(self.final, location))
+            if not self.site.same_site(target):
+                raise OffSite(f"{self.final} redirects to {target}, off {self.site.host}.")
+            self.final = target
+        raise OffSite(f"{url} redirects more than {MAX_REDIRECTS} times.")
+
+
+class OffSite(PluginError):
+    """A redirect the crawler does not follow: to another site, or past MAX_REDIRECTS."""
+
 
 def robots_of(fetch: Fetcher) -> RobotFileParser:
     """The site's robots.txt for OpsAI-Knowledge (and *): a missing one allows everything, a server error refuses
     everything (RFC 9309), and its Crawl-delay slows the fetcher."""
     parser = RobotFileParser()
-    r = fetch.get(f"{fetch.site.root}/robots.txt")
+    try:
+        r = fetch.get(f"{fetch.site.root}/robots.txt")
+    except OffSite:
+        # RFC 9309: a robots.txt that cannot be reached through its redirects is unavailable, which allows crawling.
+        parser.parse([])
+        return parser
     if r.status_code >= 500:
         parser.parse(["User-agent: *", "Disallow: /"])
     elif r.status_code >= 400:
@@ -273,13 +301,28 @@ class Walk:
     taken: int = 0
     started: str = ""
 
+    # Sitemap lines of robots.txt left out (another site's, or not an address), each [address, reason], said once.
+    refused: list[list[str]] = field(default_factory=list[list[str]])
+
     @classmethod
     def first(cls, site: Site, robots: RobotFileParser) -> Walk:
-        found = [s for s in site.starts if _is_sitemap(s)] + [normal(s) for s in robots.site_maps() or []]
+        found = [s for s in site.starts if _is_sitemap(s)]
+        refused: list[list[str]] = []
+        for line in robots.site_maps() or []:
+            address = normal(line)
+            parts = urlsplit(address)
+            if parts.scheme not in ("http", "https") or not parts.hostname:
+                refused.append([line.strip(), "A Sitemap line of robots.txt is not an address."])
+                continue
+            if site.same_site(address):
+                found.append(address)
+            else:
+                refused.append([address, f"A Sitemap line of robots.txt names another site than {site.host}."])
         if not found:
             found.append(f"{site.root}/sitemap.xml")
         pages = [[s, 0] for s in site.starts if not _is_sitemap(s)]
-        return cls(sitemaps=[[s, 0] for s in dict.fromkeys(found)], queue=pages, started=_now())
+        started = _now()
+        return cls(sitemaps=[[s, 0] for s in dict.fromkeys(found)], queue=pages, started=started, refused=refused)
 
     def dump(self) -> str:
         return json.dumps(self.__dict__, separators=(",", ":"))
@@ -316,11 +359,23 @@ def walk(ctx: Context, site: Site, state: Walk | None, *, content: bool) -> tupl
             rows.append(_row(url, updated=lastmod or state.started, marker=lastmod))
         return True
 
+    for address, why in state.refused:
+        rows.append({"id": address, "title": "Sitemap", "updated_at": state.started, "skipped": why})
+    state.refused = []
     capped = False
     while state.sitemaps and fetch.time_left():
         address, level = state.sitemaps.pop(0)
-        r = fetch.get(str(address))
+        try:
+            r = fetch.get(str(address))
+        except (OffSite, PluginError) as e:
+            if isinstance(e, RateLimited):
+                raise
+            # One sitemap that cannot be read leaves the rest of the listing working.
+            rows.append({"id": str(address), "title": "Sitemap", "updated_at": state.started, "skipped": str(e)})
+            continue
         if r.status_code >= 400:
+            rows.append({"id": str(address), "title": "Sitemap", "updated_at": state.started,
+                         "skipped": f"The sitemap answered {r.status_code}."})  # fmt: skip
             continue
         pages, children = sitemap_entries(r.text)
         if int(level) == 0:
@@ -340,7 +395,12 @@ def walk(ctx: Context, site: Site, state: Walk | None, *, content: bool) -> tupl
             break
         if not site.follow or int(depth) >= site.depth or not rows or rows[-1]["id"] != url or "skipped" in rows[-1]:
             continue
-        r = fetch.get(url)
+        try:
+            r = fetch.get(url)
+        except OffSite as e:
+            rows[-1] = _row(url, updated=state.started, skipped=str(e))
+            state.taken -= 1
+            continue
         if r.status_code >= 400:
             continue
         page = read_page(r.text)
@@ -396,7 +456,13 @@ def get_page(ctx: Context, source: dict[str, Any], id: str, tag: str | None = No
     headers: dict[str, str] = {}
     if tag:
         headers["If-None-Match" if tag.startswith(('"', "W/")) else "If-Modified-Since"] = tag
-    r = Fetcher(ctx, site).get(url, headers or None)
+    fetch = Fetcher(ctx, site)
+    try:
+        r = fetch.get(url, headers or None)
+    except OffSite as e:
+        raise BadInput(str(e)) from e
+    if fetch.final != url and (why := rule_says(site, fetch.final)):
+        raise BadInput(f"{url} redirects to {fetch.final}, which the source's rules leave out: {why}")
     if r.status_code == 304:
         return {"unchanged": True}
     if r.status_code in (404, 410):
@@ -404,7 +470,8 @@ def get_page(ctx: Context, source: dict[str, Any], id: str, tag: str | None = No
     if r.status_code >= 400:
         raise PluginError(f"{url} answered {r.status_code}.")
     path = urlsplit(url).path or "/"
-    return {"id": url, "title": path, "folder": _folder(path), **_content(url, r)}
+    # Kept under the address it was listed by; its content and link are where the redirects ended.
+    return {"id": url, "title": path, "folder": _folder(path), **_content(fetch.final, r)}
 
 
 @tool(access="read")
@@ -423,7 +490,11 @@ def preview_site(ctx: Context, source: dict[str, Any]) -> dict[str, Any]:
         outcome, will = (r["skipped"], False) if "skipped" in r else ("Will fetch", True)
         if will and checked < JS_CHECK and not source.get("render") and fetch.time_left():
             checked += 1
-            answer = fetch.get(r["id"])
+            try:
+                answer = fetch.get(r["id"])
+            except OffSite as e:
+                pages.append({"id": r["id"], "outcome": str(e), "will_fetch": False})
+                continue
             if answer.status_code < 400 and answer.headers.get("content-type", "text/html").startswith("text/html"):
                 chars = read_page(answer.text).chars
                 if chars < JS_MIN_CHARS:
