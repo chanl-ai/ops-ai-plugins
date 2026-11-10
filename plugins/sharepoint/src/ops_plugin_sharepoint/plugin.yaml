@@ -1,0 +1,122 @@
+# SharePoint and OneDrive document libraries as a knowledge source, read through Microsoft Graph with a delegated
+# sign-in. Every tool is a Python function: a Graph delta query is paged by state that data cannot describe.
+schema: ops-ai/plugin@2
+id: opsai.sharepoint
+title: SharePoint and OneDrive
+version: 0.1.0
+sdk: "1"
+
+display:
+  category: Knowledge
+  description: Files in SharePoint document libraries and OneDrive, kept current from Microsoft 365.
+  docs_url: "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app"
+  logo: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23036C70'/><circle cx='13' cy='13' r='7' fill='%231A9BA1'/><circle cx='19' cy='19' r='8' fill='%2337C6D0'/><rect x='13' y='13' width='11' height='11' rx='2' fill='white'/></svg>"
+
+connection:
+  kinds: [oauth2_auth_code]
+  authorize_url: "https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/authorize"
+  token_url: "https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
+  scopes:
+    - { id: Sites.Read.All, label: "Read items in all site collections", required: true }
+    - { id: Files.Read.All, label: "Read all files the signed-in account can read", required: true }
+    - { id: offline_access, label: "Stay signed in", required: true }
+  # A scheduled sync has no person behind it, so the source reads as the account a team admin signed in with.
+  sign_in: [team]
+  credential_settings: [tenant_id]
+  # The SharePoint address of the tenant (https://contoso.sharepoint.com): Graph answers a file's content with a
+  # redirect to this host, and the plugin follows it itself, so the host has to be reachable.
+  after_sign_in: { url: "https://graph.microsoft.com/v1.0/sites/root", read: .webUrl, setting: sharepoint_url }
+  token_hosts: [.sharepoint.com, .sharepoint.us]
+  sign_in_errors:
+    - error: access_denied
+      description_contains: AADSTS65001
+      say: A Microsoft 365 admin needs to approve Ops AI's access to SharePoint and files first.
+      who: admin
+    - error: access_denied
+      description_contains: AADSTS90094
+      say: A Microsoft 365 admin needs to approve Ops AI's access to SharePoint and files first.
+      who: admin
+    - error: invalid_client
+      description_contains: AADSTS7000215
+      say: The client secret is wrong or has expired. An admin needs to enter a current secret from the Entra app registration.
+      who: admin
+    - error: access_denied
+      say: Access was not given in Microsoft 365. Connect again to retry.
+      who: person
+  health_check: { path: /sites/root }
+
+settings:
+  tenant_id:
+    type: string
+    title: Microsoft Entra tenant id, or organizations for any work account
+    default: organizations
+    asked: config
+  sharepoint_url: { type: string, title: SharePoint address, after_sign_in: true }
+  # OneDrive files download from the tenant's -my host (https://contoso-my.sharepoint.com). The default is a host that
+  # never resolves, so a team using only SharePoint libraries reaches nothing extra.
+  onedrive_url:
+    type: string
+    title: OneDrive address
+    default: "https://onedrive.invalid"
+    asked: settings
+
+egress: ["graph.microsoft.com", "login.microsoftonline.com", "{sharepoint_url}", "{onedrive_url}"]
+endpoint: "https://graph.microsoft.com/v1.0"
+
+tools:
+  - name: list_files
+    title: List files
+    description: The files in the picked document libraries, a page of one library at a time. The last page names where changes start.
+    access: read
+    knowledge: list_items
+    function: ops_plugin_sharepoint.files:list_files
+    input:
+      source: { type: object }
+      since: { type: string, required: false }
+      cursor: { type: string, required: false }
+  - name: get_file
+    title: Read a file
+    description: One file's content, or unchanged when its version tag still matches.
+    access: read
+    knowledge: get_item
+    function: ops_plugin_sharepoint.files:get_file
+    input:
+      source: { type: object }
+      id: { type: string }
+      tag: { type: string, required: false }
+  - name: list_file_changes
+    title: List file changes
+    description: Files added, changed or deleted in the picked libraries since a cursor, from Microsoft Graph delta queries.
+    access: read
+    knowledge: list_changes
+    function: ops_plugin_sharepoint.files:list_file_changes
+    input:
+      source: { type: object }
+      cursor: { type: string, required: false }
+  - name: list_scopes
+    title: Find sites and libraries
+    description: Sites matching a name; with a site id as parent, that site's document libraries. A library as parent holds nothing.
+    access: read
+    knowledge: list_scopes
+    function: ops_plugin_sharepoint.files:list_scopes
+    input:
+      source: { type: object, required: false }
+      query: { type: string, required: false }
+      parent: { type: string, required: false }
+      cursor: { type: string, required: false }
+
+knowledge_sources:
+  - name: files
+    title: SharePoint and OneDrive
+    list: list_files
+    get: get_file
+    changes: list_file_changes
+    scopes: list_scopes
+    # Each fetch is three Graph calls (metadata, content, permissions), so a few at once keeps well under Graph's throttle.
+    fetch_at_once: 4
+    inputs:
+      sites: { type: array, required: false, picker: site, description: "Site ids; all document libraries of each are taken in unless libraries is set" }
+      libraries: { type: array, required: false, picker: library, description: "Document library (drive) ids, from any site or a OneDrive" }
+      include: { type: array, required: false, description: "Path patterns to take in; ** crosses folders" }
+      exclude: { type: array, required: false, description: "Path patterns to leave out; exclude wins" }
+    schedule: { kind: daily, time: "02:00" }

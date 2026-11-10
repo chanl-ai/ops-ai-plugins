@@ -1,0 +1,85 @@
+# Confluence Cloud and Data Center spaces as a knowledge source, over the REST API v1, which both serve with the same
+# paths and shapes. Every tool is a Python function: the listing and the CQL changes query are paged by state that
+# data cannot describe.
+schema: ops-ai/plugin@2
+id: opsai.confluence
+title: Confluence
+version: 0.1.0
+sdk: "1"
+
+display:
+  category: Knowledge
+  description: Pages and attachments of Confluence spaces, Cloud or Data Center, kept current from the wiki.
+  docs_url: "https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/"
+  logo: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230052CC'/><rect x='7' y='9' width='18' height='4' rx='2' fill='white'/><rect x='7' y='19' width='18' height='4' rx='2' fill='white'/></svg>"
+
+connection:
+  # Cloud: an Atlassian account's email and an API token, sent as basic. Data Center: a personal access token, as bearer.
+  kinds: [basic, bearer]
+  sign_in: [team]
+  health_check: { path: "/rest/api/space?limit=1" }
+
+settings:
+  # Cloud sites live under /wiki (https://acme.atlassian.net/wiki); Data Center is its own address, with its context
+  # path if it has one (https://wiki.acme.com or https://acme.com/confluence).
+  site_url: { type: string, title: Confluence address, asked: connect }
+
+# Cloud sends an attachment's bytes from Atlassian's media host after a redirect; the plugin follows it itself.
+egress: ["{site_url}", "api.media.atlassian.com"]
+endpoint: "{site_url}"
+
+tools:
+  - name: list_pages
+    title: List pages
+    description: The current pages of the picked spaces, a page of one space at a time. The last page names where changes start.
+    access: read
+    knowledge: list_items
+    function: ops_plugin_confluence.pages:list_pages
+    input:
+      source: { type: object }
+      since: { type: string, required: false }
+      cursor: { type: string, required: false }
+  - name: get_page
+    title: Read a page
+    description: A page as HTML, or an attachment of one, or unchanged when its version still matches.
+    access: read
+    knowledge: get_item
+    function: ops_plugin_confluence.pages:get_page
+    input:
+      source: { type: object }
+      id: { type: string }
+      tag: { type: string, required: false }
+  - name: list_page_changes
+    title: List page changes
+    description: Pages of the picked spaces added or edited since a cursor, found with a CQL lastmodified query.
+    access: read
+    knowledge: list_changes
+    function: ops_plugin_confluence.pages:list_page_changes
+    input:
+      source: { type: object }
+      cursor: { type: string, required: false }
+  - name: list_spaces
+    title: Find spaces
+    description: Spaces whose name or key contains a text. A space has no children to pick, so a parent answers nothing.
+    access: read
+    knowledge: list_scopes
+    function: ops_plugin_confluence.pages:list_spaces
+    input:
+      source: { type: object, required: false }
+      query: { type: string, required: false }
+      parent: { type: string, required: false }
+      cursor: { type: string, required: false }
+
+knowledge_sources:
+  - name: spaces
+    title: Confluence
+    list: list_pages
+    get: get_page
+    changes: list_page_changes
+    scopes: list_spaces
+    # A fetch is two calls for a page and a few more with attachments; Data Center sites are often small servers.
+    fetch_at_once: 4
+    inputs:
+      spaces: { type: array, picker: space, description: "Space keys" }
+      attachments: { type: boolean, required: false, description: "Also take in each page's attachments" }
+    schedule: { kind: daily, time: "03:00" }

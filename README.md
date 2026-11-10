@@ -2,8 +2,15 @@
 
 The plugins that ship with Ops AI, one folder per outside system under `plugins/`. Each is a Python package holding a
 `plugin.yaml` manifest (its sign-in, tools and knowledge sources) and, where needed, a little Python. Ops AI loads them
-when plugins are switched on (`OPS_PLUGINS`); a release pins each plugin's version: Salesforce, GitHub, and Website (a
-knowledge source that tracks a site's pages, `plugins/web`).
+when plugins are switched on (`OPS_PLUGINS`); a release pins each plugin's version.
+
+| Plugin | What it is |
+|---|---|
+| `plugins/salesforce` | Salesforce records, queries and Knowledge articles |
+| `plugins/github` | GitHub issues and pull requests |
+| `plugins/web` | A website as a knowledge source that tracks the site's pages |
+| `plugins/sharepoint` | SharePoint and OneDrive files as a knowledge source, kept current by Graph delta queries |
+| `plugins/confluence` | Confluence Cloud and Data Center pages and attachments as a knowledge source |
 
 Status: current. Private repository at github.com/chanl-ai/ops-ai-plugins.
 
