@@ -10,7 +10,7 @@ from __future__ import annotations
 import base64
 from dataclasses import dataclass, field
 from typing import Any
-from urllib.parse import parse_qs, quote, unquote, urlsplit
+from urllib.parse import parse_qs, quote, unquote
 
 import httpx
 
