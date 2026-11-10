@@ -1,0 +1,66 @@
+schema: ops-ai/plugin@2
+id: opsai.web
+title: Website
+version: 0.1.0
+sdk: "1"
+display:
+  category: Knowledge
+  description: Pages of a website, kept current from its sitemaps and links.
+connection:
+  kinds: [none]
+  sign_in: [team]
+# Every address a source reaches comes from its own start addresses (egress_from below); the plugin itself reaches no
+# fixed host, so this entry names a host that never resolves.
+egress: ["opsai-web.invalid"]
+endpoint: "https://opsai-web.invalid"
+headers:
+  User-Agent: "OpsAI-Knowledge/0.1 (+knowledge base crawler; obeys robots.txt)"
+tools:
+  - name: list_pages
+    title: List a site's pages
+    description: The pages a website source takes in, from its sitemaps and links, after its rules and robots.txt.
+    access: read
+    knowledge: list_items
+    function: ops_plugin_web.crawl:list_pages
+    input:
+      source: { type: object }
+      since: { type: string, required: false }
+      cursor: { type: string, required: false }
+  - name: get_page
+    title: Read a page
+    description: One page of a website source, or unchanged when its version tag still matches.
+    access: read
+    knowledge: get_item
+    function: ops_plugin_web.crawl:get_page
+    input:
+      source: { type: object }
+      id: { type: string }
+      tag: { type: string, required: false }
+  - name: preview_site
+    title: Preview a website source
+    description: The first pages a website source would take in, each with its outcome. Nothing is stored.
+    access: read
+    knowledge: preview
+    function: ops_plugin_web.crawl:preview_site
+    input:
+      source: { type: object }
+knowledge_sources:
+  - name: site
+    title: Website
+    list: list_pages
+    get: get_page
+    preview: preview_site
+    lists_whole: true
+    site: true
+    fetch_at_once: 1
+    egress_from: start
+    inputs:
+      start: { type: array, description: "Start pages or sitemap addresses, one site" }
+      follow_links: { type: boolean, required: false }
+      depth: { type: integer, required: false }
+      max_pages: { type: integer, required: false }
+      include: { type: array, required: false }
+      exclude: { type: array, required: false }
+      rate: { type: number, required: false }
+      render: { type: boolean, required: false }
+    schedule: { kind: daily, time: "02:00" }

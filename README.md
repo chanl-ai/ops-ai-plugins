@@ -8,6 +8,7 @@ when plugins are switched on (`OPS_PLUGINS`); a release pins each plugin's versi
 |---|---|
 | `plugins/salesforce` | Salesforce records, queries and Knowledge articles |
 | `plugins/github` | GitHub issues and pull requests |
+| `plugins/web` | A website as a knowledge source that tracks the site's pages |
 | `plugins/sharepoint` | SharePoint and OneDrive files as a knowledge source, kept current by Graph delta queries |
 | `plugins/confluence` | Confluence Cloud and Data Center pages and attachments as a knowledge source |
 
