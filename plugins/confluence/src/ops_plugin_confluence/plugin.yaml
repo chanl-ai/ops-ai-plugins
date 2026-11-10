@@ -80,6 +80,6 @@ knowledge_sources:
     # A fetch is two calls for a page and a few more with attachments; Data Center sites are often small servers.
     fetch_at_once: 4
     inputs:
-      spaces: { type: array, description: "Space keys" }
+      spaces: { type: array, picker: space, description: "Space keys" }
       attachments: { type: boolean, required: false, description: "Also take in each page's attachments" }
     schedule: { kind: daily, time: "03:00" }

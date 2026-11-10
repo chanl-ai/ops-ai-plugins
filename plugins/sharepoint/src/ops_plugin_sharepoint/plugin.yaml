@@ -115,8 +115,8 @@ knowledge_sources:
     # Each fetch is three Graph calls (metadata, content, permissions), so a few at once keeps well under Graph's throttle.
     fetch_at_once: 4
     inputs:
-      sites: { type: array, required: false, description: "Site ids; all document libraries of each are taken in unless libraries is set" }
-      libraries: { type: array, required: false, description: "Document library (drive) ids, from any site or a OneDrive" }
+      sites: { type: array, required: false, picker: site, description: "Site ids; all document libraries of each are taken in unless libraries is set" }
+      libraries: { type: array, required: false, picker: library, description: "Document library (drive) ids, from any site or a OneDrive" }
       include: { type: array, required: false, description: "Path patterns to take in; ** crosses folders" }
       exclude: { type: array, required: false, description: "Path patterns to leave out; exclude wins" }
     schedule: { kind: daily, time: "02:00" }
