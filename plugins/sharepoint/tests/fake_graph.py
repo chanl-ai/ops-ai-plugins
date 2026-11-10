@@ -1,5 +1,5 @@
 """A small Microsoft Graph for the SharePoint plugin's tests, answering in the shapes of the public v1.0 reference:
-`/sites?search=`, `/sites/{id}/drives`, a drive's `root/delta` (nextLink and deltaLink, deletions as a `deleted`
+`/sites/root` (what the plugin reads after sign-in), `/sites?search=`, `/sites/{id}/drives`, a drive's `root/delta` (nextLink and deltaLink, deletions as a `deleted`
 facet, folders alongside files), an item, its `/content` (a 302 to the tenant's SharePoint host) and its permissions.
 
 Every change bumps one counter, and a delta token is the counter's value when the deltaLink was issued, so asking
@@ -10,7 +10,7 @@ from __future__ import annotations
 import base64
 from dataclasses import dataclass, field
 from typing import Any
-from urllib.parse import parse_qs, quote, unquote
+from urllib.parse import parse_qs, quote, unquote, urlsplit
 
 import httpx
 
@@ -39,8 +39,10 @@ class Entry:
 
 
 class FakeGraph:
-    def __init__(self, page_size: int = 2) -> None:
+    def __init__(self, page_size: int = 2, sharepoint: str = SHAREPOINT) -> None:
         self.page_size = page_size
+        # The tenant's SharePoint address: where a file's content redirects to, and what `/sites/root` names.
+        self.sharepoint = sharepoint
         self.seq = 0
         self.drives: dict[str, dict[str, Entry]] = {LIB_POLICIES: {}, LIB_HANDBOOK: {}, LIB_RUNBOOKS: {}}
         self.sites = {
@@ -79,7 +81,7 @@ class FakeGraph:
         site = {LIB_POLICIES: "hr", LIB_HANDBOOK: "hr", LIB_RUNBOOKS: "ops"}[drive]
         library = {LIB_POLICIES: "Policies Library", LIB_HANDBOOK: "Handbook", LIB_RUNBOOKS: "Runbooks"}[drive]
         parts = ["sites", site, library, *([e.folder] if e.folder else []), e.name]
-        return f"{SHAREPOINT}/" + "/".join(quote(p, safe="/") for p in parts)
+        return f"{self.sharepoint}/" + "/".join(quote(p, safe="/") for p in parts)
 
     def item(self, drive: str, e: Entry) -> dict[str, Any]:
         out: dict[str, Any] = {
@@ -102,12 +104,14 @@ class FakeGraph:
         url = request.url
         path = unquote(url.path)
         q = parse_qs(url.query.decode())
-        if url.host == "contoso.sharepoint.test":
+        if url.host == urlsplit(self.sharepoint).hostname:
             # The pre-authenticated download address Graph's redirect names.
             _, _, drive, item = path.split("/", 3)
             return httpx.Response(200, content=self.drives[drive][item].content)
         assert url.host == "graph.microsoft.com", url.host
         path = path.removeprefix("/v1.0")
+        if path == "/sites/root":
+            return httpx.Response(200, json={"id": "root", "displayName": "Communication site", "webUrl": self.sharepoint})
         if path == "/sites":
             return self.search_sites(q.get("search", ["*"])[0], q)
         if path.startswith("/sites/") and path.endswith("/drives"):
@@ -128,7 +132,7 @@ class FakeGraph:
                 if len(rest) == 2:
                     return httpx.Response(200, json=self.item(drive, e))
                 if rest[2] == "content":
-                    return httpx.Response(302, headers={"Location": f"{SHAREPOINT}/dl/{drive}/{e.id}?tempauth=x"})
+                    return httpx.Response(302, headers={"Location": f"{self.sharepoint}/dl/{drive}/{e.id}?tempauth=x"})
                 if rest[2] == "permissions":
                     if self.forbid_permissions:
                         return self.error(403, "accessDenied")
@@ -144,7 +148,7 @@ class FakeGraph:
 
     def search_sites(self, text: str, q: dict[str, list[str]]) -> httpx.Response:
         rows = [
-            {"id": sid, "displayName": name, "name": slug, "webUrl": f"{SHAREPOINT}/sites/{slug}"}
+            {"id": sid, "displayName": name, "name": slug, "webUrl": f"{self.sharepoint}/sites/{slug}"}
             for sid, (name, slug, _) in self.sites.items()
             if text == "*" or text.lower() in name.lower()
         ]
