@@ -95,7 +95,7 @@ tools:
       cursor: { type: string, required: false }
   - name: list_scopes
     title: Find sites and libraries
-    description: Sites matching a name; with a site id as parent, that site's document libraries.
+    description: Sites matching a name; with a site id as parent, that site's document libraries. A library as parent holds nothing.
     access: read
     knowledge: list_scopes
     function: ops_plugin_sharepoint.files:list_scopes

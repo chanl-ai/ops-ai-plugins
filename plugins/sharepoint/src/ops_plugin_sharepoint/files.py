@@ -45,6 +45,11 @@ def _id(value: Any, what: str) -> str:
     return text
 
 
+def _is_site(value: str) -> bool:
+    """Graph names a site `<host>,<site collection id>,<web id>`; a drive (library) id has no commas."""
+    return value.count(",") == 2
+
+
 def _in_path(value: str) -> str:
     return quote(value, safe="!,")
 
@@ -399,9 +404,12 @@ def list_scopes(
     parent: str | None = None,
     cursor: str | None = None,
 ) -> dict[str, Any]:
-    """What a person picks: sites whose name matches `query`, or, with a site id as `parent`, that site's libraries."""
+    """What a person picks: sites whose name matches `query`, or, with a site id as `parent`, that site's libraries.
+    A library holds nothing to pick, so a library id as `parent` answers no scopes without asking Graph."""
     del source
     scopes: list[dict[str, Any]] = []
+    if parent and not _is_site(parent):
+        return {"scopes": scopes}
     if parent:
         site = _id(parent, "site")
         url = _graph_url(cursor) if cursor else f"{GRAPH}/sites/{_in_path(site)}/drives"

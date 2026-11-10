@@ -67,6 +67,14 @@ def test_scopes_answer_sites_for_a_query_then_a_sites_libraries() -> None:
     assert len(run(graph, "list_scopes", {})["scopes"]) == 2
 
 
+def test_a_library_as_parent_holds_nothing_to_pick() -> None:
+    # Add source asks each picker's scopes tool for what every value picked elsewhere holds, a library included.
+    graph = FakeGraph()
+    before = len(graph.requests)
+    assert run(graph, "list_scopes", {"query": "", "parent": LIB_POLICIES}) == {"scopes": []}
+    assert graph.requests[before:] == []
+
+
 def test_a_library_longer_than_one_graph_page_is_listed_whole() -> None:
     graph = FakeGraph(page_size=2)
     for n in range(5):
