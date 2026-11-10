@@ -1,0 +1,26 @@
+[project]
+name = "ops-plugin-web"
+version = "0.1.0"
+description = "The website plugin for Ops AI: a knowledge source that tracks a site through its sitemaps and links, obeying robots.txt and a rate limit, and fetches only pages that changed"
+license = "Apache-2.0"
+requires-python = ">=3.12,<3.13"
+dependencies = ["ops-plugin-sdk"]
+
+# How tools-service finds it: every installed package in this group is a plugin.
+[project.entry-points."ops_ai.plugins"]
+web = "ops_plugin_web:plugin"
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ops_plugin_web"]
+
+[tool.uv.sources]
+# The kit from the ops-ai checkout beside this repository; a release pins the kit by version instead.
+ops-plugin-sdk = { path = "../../../ops-ai/packages/ops_plugin_sdk", editable = true }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
