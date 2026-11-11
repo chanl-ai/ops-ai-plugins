@@ -1,0 +1,32 @@
+name: Tax levy
+description: A tax authority's levy on a taxpayer's accounts.
+fields:
+- key: taxpayer
+  label: Taxpayer
+  type: text
+  required: true
+- key: caseNo
+  label: Case number
+  type: text
+- key: authority
+  label: Authority
+  type: text
+- key: amountDue
+  label: Amount due
+  type: money
+- key: levyDate
+  label: Levy date
+  type: date
+- key: respondBy
+  label: Respond by
+  type: date
+- key: daysToRespond
+  label: Days to respond
+  type: number
+- key: document
+  label: Document
+  type: text
+- key: documentFileId
+  label: Levy file
+  type: file
+deadline: respondBy

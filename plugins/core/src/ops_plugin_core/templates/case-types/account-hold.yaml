@@ -1,0 +1,25 @@
+name: Account hold
+description: A hold placed on a customer's account.
+fields:
+- key: account
+  label: Account
+  type: text
+  required: true
+- key: requested
+  label: Requested
+  type: money
+- key: held
+  label: Held
+  type: money
+- key: notHeld
+  label: Not held
+  type: money
+- key: reason
+  label: Reason
+  type: text
+- key: holdId
+  label: Hold id
+  type: text
+- key: approvedBy
+  label: Approved by
+  type: text

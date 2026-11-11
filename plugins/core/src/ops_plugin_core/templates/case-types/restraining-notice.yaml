@@ -1,0 +1,29 @@
+name: Restraining notice
+description: A court's restraining notice on a debtor's accounts.
+fields:
+- key: debtor
+  label: Debtor
+  type: text
+  required: true
+- key: caseNo
+  label: Case number
+  type: text
+- key: court
+  label: Court
+  type: text
+- key: creditor
+  label: Creditor
+  type: text
+- key: amount
+  label: Amount
+  type: money
+- key: respondBy
+  label: Respond by
+  type: date
+- key: document
+  label: Document
+  type: text
+- key: documentFileId
+  label: Notice file
+  type: file
+deadline: respondBy

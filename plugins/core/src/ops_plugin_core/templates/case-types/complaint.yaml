@@ -1,0 +1,16 @@
+name: Complaint
+description: A customer's complaint and how it was triaged.
+fields:
+- key: complaint
+  label: Complaint
+  type: text
+  required: true
+- key: category
+  label: Category
+  type: text
+- key: urgency
+  label: Urgency
+  type: text
+- key: amount
+  label: Amount
+  type: money

@@ -1,0 +1,58 @@
+name: Write approval
+description: Approve a change before it is made in another system.
+params:
+  type: object
+  required:
+  - title
+  - call
+  properties:
+    title:
+      type: string
+      fallback: Approve this change
+    why:
+      type: string
+    source:
+      type: string
+    facts:
+      type: array
+    call:
+      type: object
+    history:
+      type: array
+    onApprove:
+      type: string
+      fallback: The change is made now.
+    onReject:
+      type: string
+      fallback: Nothing changes.
+regions:
+- region: header
+  bind:
+    title: '{title}'
+- region: why_source
+  bind:
+    why: '{why}'
+    source: '{source}'
+- region: facts
+  bind:
+    facts: '{facts}'
+- region: write_preview
+  bind:
+    call: '{call}'
+- region: history
+  bind:
+    events: '{history}'
+  collapsed: true
+actions:
+- name: approve
+  label: Make the change
+  consequence: '{onApprove}'
+  reason: optional
+  tone: primary
+  port: approve
+- name: reject
+  label: Decline
+  consequence: '{onReject}'
+  reason: required
+  tone: destructive
+  port: reject
