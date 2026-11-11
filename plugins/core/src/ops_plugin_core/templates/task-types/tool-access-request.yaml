@@ -1,0 +1,52 @@
+name: Tool access request
+description: Let a workflow or agent use a tool module. A copy of Write approval with the agent's reason first.
+params:
+  type: object
+  required:
+  - title
+  - facts
+  properties:
+    title:
+      type: string
+      fallback: '{typeName}'
+    reason:
+      type: string
+      fallback: No reason given.
+    source:
+      type: string
+    facts:
+      type: array
+    until:
+      type: string
+    history:
+      type: array
+regions:
+- region: header
+  bind:
+    title: '{title}'
+- region: message
+  bind:
+    text: '{reason}'
+- region: why_source
+  bind:
+    source: '{source}'
+- region: facts
+  bind:
+    facts: '{facts}'
+- region: history
+  bind:
+    events: '{history}'
+  collapsed: true
+actions:
+- name: approve
+  label: Grant
+  consequence: The tools can be used until {until}.
+  reason: none
+  tone: primary
+  port: approve
+- name: reject
+  label: Refuse
+  consequence: Nothing changes, and your reason is kept with the request.
+  reason: required
+  tone: destructive
+  port: reject

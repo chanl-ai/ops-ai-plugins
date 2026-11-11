@@ -1,0 +1,58 @@
+# The core pack: the case types and task types every team starts from. It brings templates only, so it asks for no
+# account and reaches no host. A team adds the ones it uses and edits its own copy; an update from a new version of
+# the pack merges field by field.
+schema: ops-ai/plugin@2
+id: opsai.core
+title: Core case and task types
+version: 0.1.0
+sdk: "1"
+
+display:
+  category: Core
+  description: The case types and task types a team starts from, added to the team when first used.
+
+templates:
+  - kind: case_type
+    id: restraining_notice
+    version: 2
+    path: templates/case-types/restraining-notice.yaml
+  - kind: case_type
+    id: tax_levy
+    version: 2
+    path: templates/case-types/tax-levy.yaml
+  - kind: case_type
+    id: account_hold
+    version: 1
+    path: templates/case-types/account-hold.yaml
+  - kind: case_type
+    id: complaint
+    version: 1
+    path: templates/case-types/complaint.yaml
+  - kind: task_type
+    id: generic_decision
+    version: 1
+    path: templates/task-types/generic-decision.yaml
+  - kind: task_type
+    id: document_check
+    version: 3
+    path: templates/task-types/document-check.yaml
+  - kind: task_type
+    id: write_approval
+    version: 1
+    path: templates/task-types/write-approval.yaml
+  - kind: task_type
+    id: acknowledgement
+    version: 2
+    path: templates/task-types/acknowledgement.yaml
+  - kind: task_type
+    id: data_entry
+    version: 1
+    path: templates/task-types/data-entry.yaml
+  - kind: task_type
+    id: tool_access_request
+    version: 2
+    path: templates/task-types/tool-access-request.yaml
+  - kind: task_type
+    id: app_reconnect
+    version: 1
+    path: templates/task-types/app-reconnect.yaml

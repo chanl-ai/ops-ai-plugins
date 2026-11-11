@@ -1,0 +1,50 @@
+name: Data entry
+description: Enter the details a workflow needs to go on.
+params:
+  type: object
+  required:
+  - title
+  - fields
+  properties:
+    title:
+      type: string
+      fallback: Enter the details
+    why:
+      type: string
+    fields:
+      type: array
+    history:
+      type: array
+    onSubmit:
+      type: string
+      fallback: The workflow continues with what you entered.
+    onCancel:
+      type: string
+      fallback: Nothing is created.
+regions:
+- region: header
+  bind:
+    title: '{title}'
+- region: why_source
+  bind:
+    why: '{why}'
+- region: form
+  bind:
+    fields: '{fields}'
+- region: history
+  bind:
+    events: '{history}'
+  collapsed: true
+actions:
+- name: submit
+  label: Submit
+  consequence: '{onSubmit}'
+  reason: none
+  tone: primary
+  port: approve
+- name: cancel
+  label: Cancel
+  consequence: '{onCancel}'
+  reason: optional
+  tone: neutral
+  port: reject

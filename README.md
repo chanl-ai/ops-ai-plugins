@@ -11,6 +11,7 @@ when plugins are switched on (`OPS_PLUGINS`); a release pins each plugin's versi
 | `plugins/web` | A website as a knowledge source that tracks the site's pages |
 | `plugins/sharepoint` | SharePoint and OneDrive files as a knowledge source, kept current by Graph delta queries |
 | `plugins/confluence` | Confluence Cloud and Data Center pages and attachments as a knowledge source |
+| `plugins/core` | The case types and task types every team starts from, as templates (no account, no tools) |
 
 Status: current. Private repository at github.com/chanl-ai/ops-ai-plugins.
 

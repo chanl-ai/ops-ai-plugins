@@ -1,0 +1,44 @@
+name: Reconnect an app
+description: An app turned down the team's account, or its sign-in ended; reconnect it on the app's page.
+params:
+  type: object
+  required:
+  - title
+  - said
+  properties:
+    title:
+      type: string
+      fallback: '{typeName}'
+    said:
+      type: string
+    facts:
+      type: array
+    history:
+      type: array
+regions:
+- region: header
+  bind:
+    title: '{title}'
+- region: message
+  bind:
+    text: '{said}'
+- region: facts
+  bind:
+    facts: '{facts}'
+- region: history
+  bind:
+    events: '{history}'
+  collapsed: true
+actions:
+- name: approve
+  label: Reconnected
+  consequence: The task closes. Runs that use the app work again once it is reconnected.
+  reason: none
+  tone: primary
+  port: approve
+- name: reject
+  label: Dismiss
+  consequence: The task closes and the app stays as it is.
+  reason: optional
+  tone: neutral
+  port: reject

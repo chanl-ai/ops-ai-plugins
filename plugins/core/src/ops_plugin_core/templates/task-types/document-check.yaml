@@ -1,0 +1,67 @@
+name: Document check
+description: Check the values read from a document before they are used.
+params:
+  type: object
+  required:
+  - title
+  - document
+  - fields
+  properties:
+    title:
+      type: string
+      fallback: Check the values read from this document
+    why:
+      type: string
+    source:
+      type: string
+    document:
+      type: string
+    fields:
+      type: array
+    history:
+      type: array
+    onApprove:
+      type: string
+      fallback: The workflow continues with these values.
+    onReject:
+      type: string
+      fallback: Nothing is used. The team queue decides what the document is.
+regions:
+- region: header
+  bind:
+    title: '{title}'
+- region: why_source
+  bind:
+    why: '{why}'
+    source: '{source}'
+- region: document
+  bind:
+    file: '{document}'
+    boxes: '{fields}'
+- region: form
+  bind:
+    fields: '{fields}'
+- region: history
+  bind:
+    events: '{history}'
+  collapsed: true
+actions:
+- name: approve
+  label: Approve
+  consequence: '{onApprove}'
+  reason: none
+  tone: primary
+  port: approve
+  requires: key_fields_confirmed
+- name: reject
+  label: Reject
+  consequence: '{onReject}'
+  reason: required
+  tone: destructive
+  port: reject
+  inputs:
+  - name: assignee
+    label: Send to
+    type: string
+    format: person
+    required: false

@@ -1,0 +1,52 @@
+name: Decision
+description: A yes-or-no question with the facts it rests on.
+params:
+  type: object
+  required:
+  - title
+  properties:
+    title:
+      type: string
+      fallback: '{typeName}'
+    why:
+      type: string
+    source:
+      type: string
+    facts:
+      type: array
+    history:
+      type: array
+    onApprove:
+      type: string
+      fallback: The workflow continues.
+    onReject:
+      type: string
+      fallback: The workflow stops here.
+regions:
+- region: header
+  bind:
+    title: '{title}'
+- region: why_source
+  bind:
+    why: '{why}'
+    source: '{source}'
+- region: facts
+  bind:
+    facts: '{facts}'
+- region: history
+  bind:
+    events: '{history}'
+  collapsed: true
+actions:
+- name: approve
+  label: Approve
+  consequence: '{onApprove}'
+  reason: optional
+  tone: primary
+  port: approve
+- name: reject
+  label: Reject
+  consequence: '{onReject}'
+  reason: required
+  tone: destructive
+  port: reject

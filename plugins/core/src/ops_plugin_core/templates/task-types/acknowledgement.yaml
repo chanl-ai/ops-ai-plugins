@@ -1,0 +1,60 @@
+name: Reply check
+description: Read a reply before it is sent.
+params:
+  type: object
+  required:
+  - title
+  - reply
+  properties:
+    title:
+      type: string
+      fallback: Send this reply?
+    received:
+      type: object
+    reply:
+      type: string
+    facts:
+      type: array
+    cases:
+      type: array
+    history:
+      type: array
+    onApprove:
+      type: string
+      fallback: The reply is sent.
+    onReject:
+      type: string
+      fallback: Nothing is sent.
+regions:
+- region: header
+  bind:
+    title: '{title}'
+- region: document
+  bind:
+    received: '{received}'
+- region: message
+  bind:
+    text: '{reply}'
+- region: cases
+  bind:
+    cases: '{cases}'
+- region: facts
+  bind:
+    facts: '{facts}'
+- region: history
+  bind:
+    events: '{history}'
+  collapsed: true
+actions:
+- name: approve
+  label: Send
+  consequence: '{onApprove}'
+  reason: none
+  tone: primary
+  port: approve
+- name: reject
+  label: Do not send
+  consequence: '{onReject}'
+  reason: required
+  tone: destructive
+  port: reject
