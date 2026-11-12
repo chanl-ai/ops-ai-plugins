@@ -21,10 +21,10 @@ parts:
         FROM Event USING SCOPE mine WHERE StartDateTime = TODAY ORDER BY StartDateTime
       For another day use a date literal (TOMORROW, NEXT_N_DAYS:7) or a date; for "my 2 pm" read today's and pick the one
       starting at 2 pm in the person's time. What.Name is the account or opportunity the meeting is about and Who.Name the
-      contact; to prepare for it, go on with the clients part on that account.
+      contact; to prepare for it, go on with the client-brief part on that account.
       If they asked about a day and it has no event, say in one line that Salesforce has no meetings for them then.
       If they named one meeting ("my 2 pm") and none matches, say so and ask who it is with.
-  - slug: clients
+  - slug: client-brief
     name: Read a client
     useWhen: A client, household or account in Salesforce, its contacts, open opportunities, recent activity and open cases, such as preparing for a meeting with them
     inputs:
