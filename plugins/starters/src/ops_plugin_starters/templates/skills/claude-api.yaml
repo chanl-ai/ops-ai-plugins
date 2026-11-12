@@ -1,0 +1,38 @@
+# Adapted from skills.sh/anthropics/skills/claude-api.
+name: Claude API guidance
+slug: claude-api
+use_when: When a question concerns Claude/Anthropic API usage — models, pricing, streaming, tool use, caching. (Adapted from
+  skills.sh/anthropics/skills/claude-api.)
+instructions: |
+  Answer `question` about the Claude / Anthropic API from this reference, not from memory — common shapes changed in 2025–2026, so recalled patterns are likely stale.
+
+  **Everything goes through `POST /v1/messages`.** Tool use, structured outputs and server-side tools are features of that one endpoint, not separate APIs. Supporting endpoints: Batches, Files, Token Counting, and Models for live capability lookup.
+
+  **Models** (context / input / output $ per 1M):
+
+  | Model | ID | Ctx | In | Out |
+  |---|---|---|---|---|
+  | Fable 5 | `claude-fable-5` | 1M | $10 | $50 |
+  | Opus 5 | `claude-opus-5` | 1M | $5 | $25 |
+  | Opus 4.8 / 4.7 / 4.6 | `claude-opus-4-8` / `-4-7` / `-4-6` | 1M | $5 | $25 |
+  | Sonnet 5 / 4.6 | `claude-sonnet-5` / `claude-sonnet-4-6` | 1M | $3 | $15 |
+  | Haiku 4.5 | `claude-haiku-4-5` | 200K | $1 | $5 |
+
+  Use the exact ID strings — never append a date suffix. Default to `claude-opus-5` unless the user names another model; never downgrade for cost on their behalf. Bedrock and Vertex are priced separately.
+
+  **Defaults:** `thinking: {type: "adaptive"}` for anything non-trivial, and streaming for long input, long output, or a high `max_tokens` — use the SDK's `.get_final_message()` / `.finalMessage()` helper. Depth is `output_config: {effort: "low"…"max"}`, defaulting to `high`.
+
+  **Drift to watch:** `budget_tokens` is removed on Fable 5 / Opus 5 / 4.7 / 4.8 / Sonnet 5 and returns 400 — use adaptive thinking plus `effort`. Assistant prefill returns 400 on every 4.6+ model; use structured outputs (`output_config: {format: {...}}`, not the deprecated `output_format`). Thinking `display` now defaults to `"omitted"`; set `"summarized"` if you stream reasoning to users.
+
+  **Prompt caching** is prefix-match over `tools` → `system` → `messages`: any byte change invalidates everything after it, so stable content goes first, volatile content after the last breakpoint. Minimum prefix ~1024 tokens, max 4 breakpoints. A persistent zero in `usage.cache_read_input_tokens` means a silent invalidator — a timestamp, unsorted JSON, a varying tool set.
+
+  **Pitfalls:** never truncate input silently; parse tool inputs with a real JSON parser, never string matching; catch a most-specific-first error chain, not one broad class; use the SDK's exported types and helpers rather than redefining them; the MCP connector needs both `mcp_servers` and a matching `mcp_toolset` entry. Write against the official SDK for `language`, or raw HTTP only when asked.
+inputs:
+- name: question
+  type: string
+  description: 'The Claude API question: model choice, pricing, streaming, tool use, caching, or migration.'
+  required: true
+- name: language
+  type: string
+  description: Target language or SDK for any code.
+  required: false

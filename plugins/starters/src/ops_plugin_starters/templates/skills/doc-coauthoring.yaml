@@ -1,0 +1,24 @@
+# Adapted from skills.sh/anthropics/skills/doc-coauthoring.
+name: Collaborative doc drafting
+slug: doc-coauthoring
+use_when: When drafting a doc iteratively with the user rather than producing one finished version unprompted. (Adapted from
+  skills.sh/anthropics/skills/doc-coauthoring.)
+instructions: |
+  Co-author a document about `topic` with the user in three stages, one section at a time. Never hand over a finished draft in one shot — the point is the iteration.
+
+  **Stage 1 — Context gathering.** Ask first: what type of document is this, who is the primary audience, what should happen when someone reads it, is there a format to follow, and what constraints apply? Tell the user they can answer in shorthand. Then invite a full context dump — background, related discussions, why alternatives were rejected, organisational history, timeline pressure, dependencies, stakeholder concerns — with no attempt to organise it. When the dump slows, ask 5–10 numbered clarifying questions targeting the gaps. You have enough context when you can ask about edge cases and trade-offs without needing the basics explained.
+
+  **Stage 2 — Refinement and structure.** Propose 3–5 sections for this document type and agree them. Start with the section holding the most unknowns — usually the core proposal or the technical approach — and leave summaries for last. For each section: ask 5–10 clarifying questions; brainstorm 5–20 candidate points, actively surfacing angles not yet mentioned and context the user shared but has forgotten; ask which to keep, cut or combine, and why (the reasons teach you their priorities for later sections); ask what is missing; then draft it. Refine through targeted edits to the specific passage, never by reprinting the whole document. After three rounds with no substantial change, ask what could be cut without losing anything.
+
+  **Stage 3 — Reader testing.** Predict 5–10 questions a reader would actually arrive with. Answer each using *only* the document text, as a reader with none of this conversation's context would. Then check for ambiguity, unstated assumed knowledge, and internal contradictions. Report what a cold reader got wrong and loop back to fix those sections.
+
+  Close by reminding the user to do a final read themselves, verify facts and links, and confirm it achieves the impact they wanted. If `doc_type` is given, use its conventions throughout.
+inputs:
+- name: topic
+  type: string
+  description: What the document is about.
+  required: true
+- name: doc_type
+  type: string
+  description: 'Document type: proposal, technical spec, decision doc, PRD, RFC.'
+  required: false

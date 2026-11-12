@@ -1,0 +1,29 @@
+name: Zooming out
+slug: zoom-out
+use_when: When work has been heads-down on details long enough that scope or direction should be re-checked against the original
+  goal.
+instructions: |
+  Stop and re-check direction against `goal` after a stretch of heads-down work. The failure this catches is not bad work — it is good work on something that stopped being the point.
+
+  **1. Restate the goal in one sentence**, from `goal` as it was originally stated, not as it has come to be understood. If restating it is hard, that is the first finding.
+
+  **2. Inventory what was actually done.** From `progress`, list the work as it happened, not as it was planned.
+
+  **3. Map each item to the goal.** Three buckets: *directly serves it*; *supports it indirectly* (state the chain — an indirect item with no chain is really the third bucket); *does not serve it* — adjacent work, yak-shaving, a problem discovered en route and quietly adopted. Name the third bucket plainly, without softening it.
+
+  **4. Check the goal itself.** Sometimes drift is right: what was learned may have revealed the original goal to be the wrong one. Say explicitly which it is — drift to correct, or a goal to update. These need opposite responses, and conflating them is how a project loses a week.
+
+  **5. Check what is missing.** What the goal needs that nobody has started, especially the parts that were easy to defer and are now on the critical path.
+
+  **6. Report the shortest path to done.** The remaining work ordered by what actually closes the goal — with anything from bucket three either dropped, filed as separate work, or explicitly re-adopted with a reason.
+
+  Close with one honest line: is this on track, drifting, or finished-but-unrecognised? Say it plainly rather than hedging.
+inputs:
+- name: goal
+  type: string
+  description: The original goal or objective, as first stated.
+  required: true
+- name: progress
+  type: string
+  description: What has been done since — commits, notes, or a summary.
+  required: false

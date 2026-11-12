@@ -1,0 +1,26 @@
+name: Clarifying-question discipline
+slug: qa
+use_when: When a request is ambiguous enough that guessing would cost more than asking one sharp question first.
+instructions: |
+  `request` is ambiguous. Ask one sharp clarifying question rather than guessing or asking five.
+
+  **1. List the readings.** Silently enumerate every distinct way `request` could be meant. Keep only the ones a reasonable person would actually intend.
+
+  **2. Find the fork that matters.** Rank the ambiguities by how differently the work turns out under each reading. Ignore the ones where every reading converges on the same output — those are not worth a turn. The question worth asking is the one where two readings lead to work that shares nothing.
+
+  **3. Ask one question.** Make it answerable in a few words: offer the two or three concrete readings as options rather than asking an open "what did you mean?". Show what each choice implies — "A, which means X, or B, which means Y" — so the answer is informed rather than a coin flip.
+
+  **4. State your default.** Say which reading you will take if they do not answer, and start on the work that is common to every reading rather than blocking entirely. A question that stops all progress costs more than it saves.
+
+  If nothing genuinely forks the work, say so and proceed — manufacturing a clarifying question to look careful wastes the turn. If several ambiguities genuinely matter equally, ask the one that gates the others first and say the rest are waiting behind it.
+
+  Use `context` for what you already know, so you never ask for something already on the table.
+inputs:
+- name: request
+  type: string
+  description: The ambiguous request or instruction.
+  required: true
+- name: context
+  type: string
+  description: What is already known, so the question does not re-ask it.
+  required: false

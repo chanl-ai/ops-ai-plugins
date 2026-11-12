@@ -1,0 +1,30 @@
+name: Mapping a decision
+slug: decision-mapping
+use_when: When a decision has multiple options and the tradeoffs need to be laid out before choosing.
+instructions: |
+  Lay out the options for `decision` and their trade-offs before anything is chosen. The deliverable is a map someone else can disagree with, not a recommendation dressed up as analysis.
+
+  **1. State the decision precisely.** What is being chosen, by when, and what becomes irreversible once it is made. If the decision as posed contains two decisions, split them and say which one gates the other.
+
+  **2. Name the criteria first, before the options.** What actually matters here — cost, reversibility, time to first value, operational burden, blast radius if wrong, who has to learn something new. Ordering the criteria *before* listing options is what stops the analysis being reverse-engineered from a favourite.
+
+  **3. Enumerate real options.** At least three, and always include doing nothing and the cheapest partial move. Reject strawmen: every option listed must be one a reasonable person would actually argue for.
+
+  **4. Score each option against each criterion**, in a table, with a one-line reason per cell rather than a bare rating. Note where a cell is a guess rather than a known.
+
+  **5. Name what each option costs.** Not just the downside but the *closed door* — what this choice makes harder or impossible later, and how hard it would be to reverse in three months.
+
+  **6. State what would change the answer.** For each leading option: the fact that, if true, would rule it out. Then say which of those facts is cheap to check now. This is usually the most valuable line in the document.
+
+  **7. Give a recommendation, clearly separated** from the map above, with its reasoning and its confidence.
+
+  Respect any constraints in `constraints` and mark every assumption you made as an assumption.
+inputs:
+- name: decision
+  type: string
+  description: The decision to be made.
+  required: true
+- name: constraints
+  type: string
+  description: Budget, deadline, existing commitments, or non-negotiables.
+  required: false
