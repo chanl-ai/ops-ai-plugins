@@ -1,8 +1,7 @@
 # Adapted from skills.sh/mattpocock/skills/handoff.
 name: Writing a handoff
 slug: handoff
-use_when: When work is ending mid-task and the next person or session needs enough context to pick it up cleanly. (Adapted
-  from skills.sh/mattpocock/skills/handoff.)
+use_when: When work is ending mid-task and the next person or session needs enough context to pick it up cleanly.
 instructions: |
   Compact everything established so far into a handoff document a fresh session can act on without re-deriving it.
 

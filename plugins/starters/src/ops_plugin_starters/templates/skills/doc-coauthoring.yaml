@@ -1,8 +1,7 @@
 # Adapted from skills.sh/anthropics/skills/doc-coauthoring.
 name: Collaborative doc drafting
 slug: doc-coauthoring
-use_when: When drafting a doc iteratively with the user rather than producing one finished version unprompted. (Adapted from
-  skills.sh/anthropics/skills/doc-coauthoring.)
+use_when: When drafting a doc iteratively with the user rather than producing one finished version unprompted.
 instructions: |
   Co-author a document about `topic` with the user in three stages, one section at a time. Never hand over a finished draft in one shot — the point is the iteration.
 

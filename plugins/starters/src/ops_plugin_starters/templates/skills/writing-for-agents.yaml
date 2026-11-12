@@ -1,7 +1,7 @@
 # Adapted from skills.sh/mattpocock/skills/writing-for-agents.
 name: Writing for agents
 slug: writing-for-agents
-use_when: When drafting documentation or a prompt that another AI agent will read and act on. (Adapted from skills.sh/mattpocock/skills/writing-for-agents.)
+use_when: When drafting documentation or a prompt that another AI agent will read and act on.
 instructions: |
   Edit or draft `document` as a document another agent will consume and act on. The goal is *predictability* — the agent taking the same process every run — not identical output.
 

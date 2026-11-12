@@ -1,7 +1,7 @@
 # Adapted from skills.sh/mattpocock/skills/domain-modeling.
 name: Domain modeling
 slug: domain-modeling
-use_when: When a feature needs its core entities and relationships named before any code gets written. (Adapted from skills.sh/mattpocock/skills/domain-modeling.)
+use_when: When a feature needs its core entities and relationships named before any code gets written.
 instructions: |
   Actively build and sharpen the domain model for `feature` — do not merely restate the vocabulary already in use. The output is a glossary plus, occasionally, a decision record.
 

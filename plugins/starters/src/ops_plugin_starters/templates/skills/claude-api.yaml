@@ -1,8 +1,7 @@
 # Adapted from skills.sh/anthropics/skills/claude-api.
 name: Claude API guidance
 slug: claude-api
-use_when: When a question concerns Claude/Anthropic API usage — models, pricing, streaming, tool use, caching. (Adapted from
-  skills.sh/anthropics/skills/claude-api.)
+use_when: When a question concerns Claude/Anthropic API usage — models, pricing, streaming, tool use, caching.
 instructions: |
   Answer `question` about the Claude / Anthropic API from this reference, not from memory — common shapes changed in 2025–2026, so recalled patterns are likely stale.
 

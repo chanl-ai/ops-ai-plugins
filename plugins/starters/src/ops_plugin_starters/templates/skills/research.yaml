@@ -2,7 +2,6 @@
 name: Structured research
 slug: research
 use_when: When a question needs a methodical research pass — sources gathered and weighed — instead of a single-shot answer.
-  (Adapted from skills.sh/mattpocock/skills/research.)
 instructions: |
   Investigate `question` against high-trust primary sources and return findings that survive scrutiny.
 

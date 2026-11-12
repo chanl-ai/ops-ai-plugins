@@ -1,7 +1,7 @@
 # Adapted from skills.sh/mattpocock/skills/code-review.
 name: Code review
 slug: code-review
-use_when: When asked to review a diff or change for correctness bugs before it ships. (Adapted from skills.sh/mattpocock/skills/code-review.)
+use_when: When asked to review a diff or change for correctness bugs before it ships.
 instructions: |
   Review `diff` on two independent axes and report them separately. Do not merge or rerank the findings across axes — a change can pass one and fail the other, and separating them stops one from masking the other.
 

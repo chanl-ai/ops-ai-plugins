@@ -2,7 +2,7 @@
 name: Triage discipline
 slug: triage
 use_when: When a batch of incoming issues or requests needs to be sorted by severity and ownership before acting on any of
-  them. (Adapted from skills.sh/mattpocock/skills/triage.)
+  them.
 instructions: |
   Move each item in `items` through a small state machine and return the result as a table.
 

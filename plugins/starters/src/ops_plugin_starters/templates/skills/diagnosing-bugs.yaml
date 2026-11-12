@@ -1,7 +1,7 @@
 # Adapted from skills.sh/mattpocock/skills/diagnosing-bugs.
 name: Diagnosing bugs
 slug: diagnosing-bugs
-use_when: When a reported symptom needs a structured root-cause pass instead of a guess-and-check fix. (Adapted from skills.sh/mattpocock/skills/diagnosing-bugs.)
+use_when: When a reported symptom needs a structured root-cause pass instead of a guess-and-check fix.
 instructions: |
   A discipline for hard bugs and performance regressions reported as `symptom`. Skip a phase only with explicit justification, and redact every secret you quote back.
 

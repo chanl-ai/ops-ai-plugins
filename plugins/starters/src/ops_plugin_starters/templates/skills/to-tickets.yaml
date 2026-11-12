@@ -1,7 +1,7 @@
 # Adapted from skills.sh/mattpocock/skills/to-tickets.
 name: Turn issues into tickets
 slug: to-tickets
-use_when: When a set of issues needs to become actionable, estimable tickets. (Adapted from skills.sh/mattpocock/skills/to-tickets.)
+use_when: When a set of issues needs to become actionable, estimable tickets.
 instructions: |
   Break `source` into a set of tickets — tracer-bullet vertical slices, each declaring the tickets that block it.
 

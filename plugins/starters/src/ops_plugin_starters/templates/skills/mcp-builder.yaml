@@ -1,8 +1,7 @@
 # Adapted from skills.sh/anthropics/skills/mcp-builder.
 name: Building an MCP server
 slug: mcp-builder
-use_when: When designing a new MCP server or tool surface and the tool/prompt contract needs to be worked out. (Adapted from
-  skills.sh/anthropics/skills/mcp-builder.)
+use_when: When designing a new MCP server or tool surface and the tool/prompt contract needs to be worked out.
 instructions: |
   Design the tool and prompt surface for an MCP server over `service`. This is design and planning — produce the contract, not an implementation.
 

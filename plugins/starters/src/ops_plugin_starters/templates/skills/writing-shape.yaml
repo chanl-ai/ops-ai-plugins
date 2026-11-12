@@ -1,7 +1,7 @@
 # Adapted from skills.sh/mattpocock/skills/writing-shape.
 name: Shaping long-form writing
 slug: writing-shape
-use_when: When a long document needs its structure and argument order fixed, not just line edits. (Adapted from skills.sh/mattpocock/skills/writing-shape.)
+use_when: When a long document needs its structure and argument order fixed, not just line edits.
 instructions: |
   Shape `material` into an article, block by block. This is *exploit*, not explore: the pile is fixed — commit to a structure and mine the pile to fill it. Treat `material` as read-only; the article is a new document.
 

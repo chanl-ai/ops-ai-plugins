@@ -1,7 +1,7 @@
 # Adapted from skills.sh/mattpocock/skills/tdd.
 name: Test-driven development
 slug: tdd
-use_when: When starting new logic and a test-first pass would catch design mistakes before implementation. (Adapted from skills.sh/mattpocock/skills/tdd.)
+use_when: When starting new logic and a test-first pass would catch design mistakes before implementation.
 instructions: |
   Run a test-first pass on `feature` before any implementation is written.
 
