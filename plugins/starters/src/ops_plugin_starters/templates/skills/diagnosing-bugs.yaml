@@ -1,4 +1,4 @@
-# Adapted from skills.sh/mattpocock/skills/diagnosing-bugs.
+# Adapted from github.com/mattpocock/skills, skills/engineering/diagnosing-bugs (MIT; see THIRD_PARTY_NOTICES.md).
 name: Diagnosing bugs
 slug: diagnosing-bugs
 use_when: When a reported symptom needs a structured root-cause pass instead of a guess-and-check fix.

@@ -1,5 +1,5 @@
 name: Plain-language rewrite
-slug: caveman
+slug: plain-language
 use_when: When technical or jargon-heavy text needs to be rewritten so a non-expert can follow it.
 instructions: |
   Rewrite `text` so someone outside the field can follow it, without making it wrong.

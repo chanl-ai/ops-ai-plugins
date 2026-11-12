@@ -1,4 +1,4 @@
-# Adapted from skills.sh/mattpocock/skills/to-tickets.
+# Adapted from github.com/mattpocock/skills, skills/engineering/to-tickets (MIT; see THIRD_PARTY_NOTICES.md).
 name: Turn issues into tickets
 slug: to-tickets
 use_when: When a set of issues needs to become actionable, estimable tickets.

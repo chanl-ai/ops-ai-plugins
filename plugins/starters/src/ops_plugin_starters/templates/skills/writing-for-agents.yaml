@@ -1,4 +1,4 @@
-# Adapted from skills.sh/mattpocock/skills/writing-for-agents.
+# Adapted from github.com/mattpocock/skills, skills/productivity/writing-for-agents (MIT; see THIRD_PARTY_NOTICES.md).
 name: Writing for agents
 slug: writing-for-agents
 use_when: When drafting documentation or a prompt that another AI agent will read and act on.

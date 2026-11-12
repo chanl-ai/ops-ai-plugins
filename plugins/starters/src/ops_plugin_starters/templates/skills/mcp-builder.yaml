@@ -1,4 +1,4 @@
-# Adapted from skills.sh/anthropics/skills/mcp-builder.
+# Adapted from github.com/anthropics/skills, skills/mcp-builder (Apache-2.0; see THIRD_PARTY_NOTICES.md).
 name: Building an MCP server
 slug: mcp-builder
 use_when: When designing a new MCP server or tool surface and the tool/prompt contract needs to be worked out.

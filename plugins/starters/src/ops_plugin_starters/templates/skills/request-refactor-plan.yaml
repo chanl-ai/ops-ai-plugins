@@ -1,3 +1,4 @@
+# Based on an earlier version of github.com/mattpocock/skills, request-refactor-plan (MIT; see THIRD_PARTY_NOTICES.md).
 name: Refactor planning
 slug: request-refactor-plan
 use_when: When a change is large enough that it needs a written plan before touching code.

@@ -1,4 +1,4 @@
-# Adapted from skills.sh/mattpocock/skills/domain-modeling.
+# Adapted from github.com/mattpocock/skills, skills/engineering/domain-modeling (MIT; see THIRD_PARTY_NOTICES.md).
 name: Domain modeling
 slug: domain-modeling
 use_when: When a feature needs its core entities and relationships named before any code gets written.

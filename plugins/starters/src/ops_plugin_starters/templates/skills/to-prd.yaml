@@ -1,3 +1,4 @@
+# Based on an earlier version of github.com/mattpocock/skills, to-prd (MIT; see THIRD_PARTY_NOTICES.md).
 name: Turn a request into a PRD
 slug: to-prd
 use_when: When a rough feature ask needs to become a structured product requirements doc.

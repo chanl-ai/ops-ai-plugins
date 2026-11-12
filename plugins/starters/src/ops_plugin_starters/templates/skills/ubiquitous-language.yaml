@@ -1,3 +1,4 @@
+# Based on an earlier version of github.com/mattpocock/skills, ubiquitous-language (MIT; see THIRD_PARTY_NOTICES.md).
 name: Ubiquitous language
 slug: ubiquitous-language
 use_when: When a domain's terminology is inconsistent across a conversation or spec and needs a single agreed vocabulary.

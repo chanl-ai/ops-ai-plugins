@@ -38,9 +38,9 @@ templates:
   version: 1
   path: templates/skills/tdd.yaml
 - kind: skill
-  id: caveman
+  id: plain-language
   version: 1
-  path: templates/skills/caveman.yaml
+  path: templates/skills/plain-language.yaml
 - kind: skill
   id: doc-coauthoring
   version: 1

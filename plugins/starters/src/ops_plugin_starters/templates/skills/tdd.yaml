@@ -1,4 +1,4 @@
-# Adapted from skills.sh/mattpocock/skills/tdd.
+# Adapted from github.com/mattpocock/skills, skills/engineering/tdd (MIT; see THIRD_PARTY_NOTICES.md).
 name: Test-driven development
 slug: tdd
 use_when: When starting new logic and a test-first pass would catch design mistakes before implementation.

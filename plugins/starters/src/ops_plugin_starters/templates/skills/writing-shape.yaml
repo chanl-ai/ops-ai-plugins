@@ -1,4 +1,4 @@
-# Adapted from skills.sh/mattpocock/skills/writing-shape.
+# Adapted from github.com/mattpocock/skills, skills/in-progress/writing-shape (MIT; see THIRD_PARTY_NOTICES.md).
 name: Shaping long-form writing
 slug: writing-shape
 use_when: When a long document needs its structure and argument order fixed, not just line edits.

@@ -1,17 +1,24 @@
-# Adapted from skills.sh/anthropics/skills/doc-coauthoring.
-name: Collaborative doc drafting
+name: Doc co-authoring
 slug: doc-coauthoring
-use_when: When drafting a doc iteratively with the user rather than producing one finished version unprompted.
+use_when: When the user wants to write a document together, section by section, rather than receive a finished draft.
 instructions: |
-  Co-author a document about `topic` with the user in three stages, one section at a time. Never hand over a finished draft in one shot — the point is the iteration.
+  Write a document about `topic` together with the user. They own the content and the decisions; you propose, draft and check. Work in small pieces they can accept or change, not one long draft.
 
-  **Stage 1 — Context gathering.** Ask first: what type of document is this, who is the primary audience, what should happen when someone reads it, is there a format to follow, and what constraints apply? Tell the user they can answer in shorthand. Then invite a full context dump — background, related discussions, why alternatives were rejected, organisational history, timeline pressure, dependencies, stakeholder concerns — with no attempt to organise it. When the dump slows, ask 5–10 numbered clarifying questions targeting the gaps. You have enough context when you can ask about edge cases and trade-offs without needing the basics explained.
+  **Agree the brief.** Before writing, settle four things in one short message: who will read it, what that reader should do or decide after reading, roughly how long it should be, and anything it must follow (a template, a house style, a deadline). Offer your best guess for each so the user can answer "yes" or correct one word. If `doc_type` is given, use what that kind of document normally contains as your starting guess.
 
-  **Stage 2 — Refinement and structure.** Propose 3–5 sections for this document type and agree them. Start with the section holding the most unknowns — usually the core proposal or the technical approach — and leave summaries for last. For each section: ask 5–10 clarifying questions; brainstorm 5–20 candidate points, actively surfacing angles not yet mentioned and context the user shared but has forgotten; ask which to keep, cut or combine, and why (the reasons teach you their priorities for later sections); ask what is missing; then draft it. Refine through targeted edits to the specific passage, never by reprinting the whole document. After three rounds with no substantial change, ask what could be cut without losing anything.
+  **Propose an outline.** List the headings, each with one line saying what that section has to establish for the reader. Put the section the user is least sure about early, because it shapes the others. Let the user reorder, merge or drop sections before any prose exists.
 
-  **Stage 3 — Reader testing.** Predict 5–10 questions a reader would actually arrive with. Answer each using *only* the document text, as a reader with none of this conversation's context would. Then check for ambiguity, unstated assumed knowledge, and internal contradictions. Report what a cold reader got wrong and loop back to fix those sections.
+  **Draft one section at a time.** For each section:
+  - Ask only for facts you cannot find in what the user has already given you.
+  - Write the section plainly, in the user's terms. Mark any claim that needs a source or a number you do not have with `[check]` instead of inventing it.
+  - End with the questions this section raised, so the user can answer them now or park them.
+  - When the user asks for a change, rewrite only the passage they pointed at and show that passage, not the whole document.
 
-  Close by reminding the user to do a final read themselves, verify facts and links, and confirm it achieves the impact they wanted. If `doc_type` is given, use its conventions throughout.
+  **Keep a running list** of open questions and `[check]` marks, and show it whenever it changes.
+
+  **Before calling it done, read it cold.** Read the whole document as the reader from the brief, who has not seen this conversation. Note every place they would stop: a term never explained, a step that assumes knowledge, two sections that disagree, a conclusion the evidence does not support. Fix those with the user, then confirm every `[check]` is resolved or deliberately left open.
+
+  Finish with the document, the list of anything still open, and a reminder that the user should check the facts and links themselves before sending it.
 inputs:
 - name: topic
   type: string
@@ -19,5 +26,5 @@ inputs:
   required: true
 - name: doc_type
   type: string
-  description: 'Document type: proposal, technical spec, decision doc, PRD, RFC.'
+  description: 'The kind of document, for example a proposal, design spec, decision record, runbook or report.'
   required: false

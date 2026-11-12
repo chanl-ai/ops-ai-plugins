@@ -17,6 +17,10 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/ops_plugin_starters"]
 
+# The licenses of the adapted skills travel with every copy of the pack.
+[tool.hatch.build.targets.wheel.force-include]
+"THIRD_PARTY_NOTICES.md" = "ops_plugin_starters/THIRD_PARTY_NOTICES.md"
+
 [tool.uv.sources]
 # The kit from the ops-ai checkout beside this repository; a release pins the kit by version instead.
 ops-plugin-sdk = { path = "../../../ops-ai/packages/ops_plugin_sdk", editable = true }

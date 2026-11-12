@@ -1,4 +1,4 @@
-# Adapted from skills.sh/mattpocock/skills/triage.
+# Adapted from github.com/mattpocock/skills, skills/engineering/triage (MIT; see THIRD_PARTY_NOTICES.md).
 name: Triage discipline
 slug: triage
 use_when: When a batch of incoming issues or requests needs to be sorted by severity and ownership before acting on any of

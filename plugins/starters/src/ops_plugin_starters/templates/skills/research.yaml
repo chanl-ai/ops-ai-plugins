@@ -1,4 +1,4 @@
-# Adapted from skills.sh/mattpocock/skills/research.
+# Adapted from github.com/mattpocock/skills, skills/engineering/research (MIT; see THIRD_PARTY_NOTICES.md).
 name: Structured research
 slug: research
 use_when: When a question needs a methodical research pass — sources gathered and weighed — instead of a single-shot answer.

@@ -1,4 +1,4 @@
-# Adapted from skills.sh/mattpocock/skills/handoff.
+# Adapted from github.com/mattpocock/skills, skills/productivity/handoff (MIT; see THIRD_PARTY_NOTICES.md).
 name: Writing a handoff
 slug: handoff
 use_when: When work is ending mid-task and the next person or session needs enough context to pick it up cleanly.
