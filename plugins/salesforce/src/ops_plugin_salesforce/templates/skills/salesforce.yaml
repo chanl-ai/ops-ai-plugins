@@ -1,0 +1,98 @@
+# One skill with three parts, loaded when the ask is about the person's Salesforce clients, meetings or opportunities.
+name: Salesforce
+slug: salesforce
+useWhen: The person's Salesforce work, meaning their meetings and calls, a client, household or account with its contacts, opportunities, activity and cases, and logging what came of a meeting or changing an opportunity
+loading: on_match
+instructions: |-
+  Salesforce holds the person's clients as Accounts, with Contacts, Opportunities, Tasks, Events (meetings and calls)
+  and Cases. Read with query, using the words of a name the person gave; save with save_records only. Say what the
+  records say, never more. Pick the part that fits the ask and follow it; a meeting brief uses prepare-meeting and then
+  clients for the account it names.
+parts:
+  - slug: prepare-meeting
+    name: Prepare for a meeting
+    useWhen: The person asks about their own meetings or calls today or on another day, who each is with, or to be prepared for one
+    inputs:
+      - { name: day, description: "The day to read, such as today, tomorrow or a date; today when empty" }
+      - { name: meeting, description: "Which meeting, such as 2 pm or the client's name" }
+    instructions: |-
+      Meetings and calls are Salesforce Events. Read the person's own with USING SCOPE mine, never by a user id:
+        SELECT Id, Subject, StartDateTime, EndDateTime, Location, Description, Who.Name, What.Name, WhatId, WhoId
+        FROM Event USING SCOPE mine WHERE StartDateTime = TODAY ORDER BY StartDateTime
+      For another day use a date literal (TOMORROW, NEXT_N_DAYS:7) or a date; for "my 2 pm" read today's and pick the one
+      starting at 2 pm in the person's time. What.Name is the account or opportunity the meeting is about and Who.Name the
+      contact; to prepare for it, go on with the client-brief part on that account.
+      If they asked about a day and it has no event, say in one line that Salesforce has no meetings for them then.
+      If they named one meeting ("my 2 pm") and none matches, say so and ask who it is with.
+  - slug: client-brief
+    name: Read a client
+    useWhen: A client, household or account in Salesforce, its contacts, open opportunities, recent activity and open cases, such as preparing for a meeting with them
+    inputs:
+      - { name: client, required: true, description: "The client's name, or the account id when an earlier read gave it" }
+    instructions: |-
+      Read the client in one query: the account with its contacts, open opportunities, recent activity and open cases.
+        SELECT Id, Name, Type, Description, Phone, LastActivityDate, Owner.Name,
+          (SELECT Id, Name, Title, Email, Phone FROM Contacts),
+          (SELECT Id, Name, StageName, Amount, CloseDate, NextStep FROM Opportunities WHERE IsClosed = false),
+          (SELECT Id, Subject, ActivityDate, Status, Description FROM Tasks ORDER BY ActivityDate DESC NULLS LAST LIMIT 5),
+          (SELECT Id, Subject, StartDateTime, Description FROM Events WHERE StartDateTime = LAST_N_DAYS:90),
+          (SELECT Id, CaseNumber, Subject, Status FROM Cases WHERE IsClosed = false)
+        FROM Account WHERE Name LIKE '%{{client}}%' LIMIT 2
+      Use the words of the client's name the person gave. If two accounts come back, name both and ask which one. If none
+      does, search once with the words of the name, then run the same query on the account it finds. When an earlier read
+      already names the account (a task's or an opportunity's AccountId), run this query on that id (WHERE Id = '<id>')
+      at once: never read the account by itself first.
+      To prepare someone for a meeting, show the brief with present, kind brief. Every field is plain text, not a list:
+      title the client's name; when one short line, the meeting's time from its Event (left out when there is none); who
+      one short line naming the contacts, such as "Grace Okafor, Trustee". Sections Opportunities, Recent activity and
+      Open cases, each with its count and its top items as {text, detail}: text names the record in a few words (a case as
+      "Case <CaseNumber>: <Subject>"), detail is one short line such as a stage and amount or a date and status. Then app
+      "plugin:opsai.salesforce" and open {path: "/lightning/r/Account/<id>/view"}.
+      Give followUps such as "Log what came of the meeting". Then reply in one lead line naming the client and the meeting
+      and up to three points they should be ready on, each from a record you read.
+  - slug: update-opportunity
+    name: Log a meeting or update an opportunity
+    useWhen: Logging what came of a meeting or call with a client, or opening or changing an opportunity in Salesforce
+    inputs:
+      - { name: client, description: "The client the meeting or opportunity is for" }
+      - { name: note, description: "What came of the meeting, as the person said it" }
+    instructions: |-
+      Unless an earlier read in this conversation already holds them, read the account and its open opportunities in one
+      query, and in the same step the allowed stages with field_values on Opportunity:
+        SELECT Id, Name, (SELECT Id, Name, StageName, Amount, CloseDate, NextStep FROM Opportunities WHERE IsClosed = false)
+        FROM Account WHERE Name LIKE '%{{client}}%' LIMIT 2
+      Then work it out in short questions, which a person on the road answers with one tap. Ask only what you cannot
+      infer from their words or the records, one question per reply, and give each question its likely answers as
+      followUps (at most three), taken from the data:
+      - Which opportunity, only when there is a real choice: followUps "Update <its name>" and "New opportunity". With one
+        open opportunity that fits, use it without asking.
+      - The stage: infer it when their words fix it. "Forward a stage" or "the next stage" is the value after the current
+        one in field_values' order; "won", "lost" or a named stage is that value. Ask only when it is open, with the
+        likeliest allowed values as followUps.
+      - The amount, when it is unclear: followUps such as "Same amount" and the amount their words suggest.
+      - The close date, when it should move: two or three dates as followUps.
+      - The meeting note, only if they gave none.
+      Defaults you need not ask for: a new opportunity's name is "<account> - <topic>", its close date 90 days from today,
+      its stage the first open one; the task is completed today, owned by the person.
+      Every reply in this flow ends with either one question and its followUps, or the read-back and its followUps; never
+      state the plan without one of them. When everything is known, read it back in one plain line naming the opportunity and each change, such as
+      "Update Education savings: stage Proposal/Price Quote, amount $75,000, and log the meeting note. Save?", with
+      followUps "Save", "Change something" and "Show as form".
+      If the person's preferences say they want forms for Salesforce updates, skip the questions and the read-back: show
+      the form at once. The form, and the answer to "Show as form": present, kind form: title "Log to Salesforce", one field
+      per value you will save (name, label, type, value; a stage as a select with the allowed values), submit {label:
+      "Save", reply: "Save these to Salesforce"}, edit {label: "Edit", reply: "Let me change something"}, app
+      "plugin:opsai.salesforce". Its Save sends "Save these to Salesforce (<label>: <value>, ...)": save those values.
+      Save only when your reply just before in this conversation was the read-back (or the form) of exactly the values you
+      will save, and the person answered it with Save. A "Save" with no such read-back before it, or an ask that says to
+      save in the same breath, gets the read-back first and nothing is written yet.
+      Then save everything with one save_records call, in this order:
+        1. the opportunity: an update {object: Opportunity, id, fields: {StageName, NextStep, ...}}, or a new one
+           {object: Opportunity, ref: opp, fields: {Name, AccountId, StageName, CloseDate, Amount?}}
+        2. the meeting note: {object: Task, fields: {Subject, WhatId: the opportunity's id or "@{opp.id}", WhoId?,
+           Status: Completed, ActivityDate: today, Description: the note}}
+      Never save the two parts in separate calls; the team may have the save wait for an approver, and then say so in one
+      line. If Salesforce refuses a field, say which and why in one line and ask for the value again, saving nothing else.
+      Once saved, show what changed with present, kind entity: the opportunity's title, each field the save changed as
+      {label, value, was} (was: the value before), the meeting note as {label: "Meeting note", value: the note's text},
+      status {text: "Saved", tone: success}, app as above and open {path: "/lightning/r/Opportunity/<id>/view"}.

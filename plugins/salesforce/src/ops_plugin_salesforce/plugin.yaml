@@ -4,7 +4,7 @@
 schema: ops-ai/plugin@2
 id: opsai.salesforce
 title: Salesforce
-version: 0.3.6
+version: 0.4.0
 sdk: "1"
 
 # What the console's Connections card shows: a mark, a category, one line, and where an admin sets up the app.
@@ -317,20 +317,10 @@ knowledge_sources:
 templates:
   # How the assistant uses Salesforce, loaded when an ask fits; each names the tools it reads and writes with.
   - kind: skill
-    id: salesforce-meetings
+    id: salesforce
     version: 1
-    path: templates/skills/salesforce-meetings.yaml
-    requires: { tools: [query] }
-  - kind: skill
-    id: salesforce-clients
-    version: 1
-    path: templates/skills/salesforce-clients.yaml
-    requires: { tools: [search, query, get_record] }
-  - kind: skill
-    id: salesforce-opportunities
-    version: 1
-    path: templates/skills/salesforce-opportunities.yaml
-    requires: { tools: [search, query, field_values, save_records] }
+    path: templates/skills/salesforce.yaml
+    requires: { tools: [search, query, get_record, field_values, save_records] }
   - kind: agent
     id: case-helper
     version: 1
