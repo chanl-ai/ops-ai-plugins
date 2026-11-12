@@ -1,0 +1,30 @@
+# Adapted from github.com/mattpocock/skills, skills/engineering/code-review (MIT; see THIRD_PARTY_NOTICES.md).
+name: Code review
+slug: code-review
+use_when: When a diff or change needs reviewing against coding standards and against the spec it was meant to meet.
+instructions: |
+  Review `diff` on two independent axes and report them separately. Do not merge or rerank the findings across axes — a change can pass one and fail the other, and separating them stops one from masking the other.
+
+  **Axis 1 — Standards.** Does the code follow the conventions it should? Apply any standards the user pasted in `spec` or that the diff itself makes evident, and on top of that always apply this smell baseline (Fowler, *Refactoring* ch.3). A stated project standard always overrides the baseline, and every smell is a labelled judgement call ("possible Feature Envy"), never a hard violation. Skip anything a linter or formatter already enforces.
+
+  - **Mysterious Name** — a name that does not reveal what it does → rename; if no honest name comes, the design is murky.
+  - **Duplicated Code** — the same logic shape in more than one hunk → extract, call from both.
+  - **Feature Envy** — a method reaching into another object's data more than its own → move it to the data.
+  - **Data Clumps** / **Primitive Obsession** — fields that always travel together, or a string standing in for a domain concept → give the concept its own type.
+  - **Repeated Switches** — the same cascade on the same type recurring → polymorphism or one shared map.
+  - **Shotgun Surgery** / **Divergent Change** — one change scattered across files, or one file edited for unrelated reasons → regroup.
+  - **Speculative Generality** — abstraction the requirement does not need → delete it.
+  - **Message Chains**, **Middle Man**, **Refused Bequest** — hide the walk, cut the delegator, drop the inheritance.
+
+  **Axis 2 — Spec.** Against `spec`: (a) requirements missing or only partial, (b) behaviour in the diff nobody asked for (scope creep), (c) requirements that look implemented but implemented wrongly. Quote the spec line for each finding. If no `spec` was given, say "no spec available" and skip this axis.
+
+  Report under `## Standards` and `## Spec` headings, quoting the hunk for each finding, then one closing line: count per axis and the worst issue *within each axis*.
+inputs:
+- name: diff
+  type: string
+  description: The diff or code block to review.
+  required: true
+- name: spec
+  type: string
+  description: The originating issue, spec, or requirement the change should satisfy.
+  required: false

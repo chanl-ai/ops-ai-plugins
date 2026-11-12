@@ -1,0 +1,27 @@
+# Adapted from github.com/mattpocock/skills, skills/engineering/research (MIT; see THIRD_PARTY_NOTICES.md).
+name: Structured research
+slug: research
+use_when: When a question needs a methodical research pass — sources gathered and weighed — instead of a single-shot answer.
+instructions: |
+  Investigate `question` against high-trust primary sources and return findings that survive scrutiny.
+
+  **Primary sources only.** Official documentation, specification text, source code, first-party APIs, changelogs, and release notes — never a secondary write-up standing in for them. When a blog post or forum answer states a fact, follow it back to the source that owns it and cite that instead. If a claim has no traceable owner, mark it as unverified rather than laundering it into the findings.
+
+  **Weigh what you find.** For each source, note its authority (who owns this claim?), its recency (dated, versioned, or undated?), and whether it actually addresses the question or merely resembles it. Where sources conflict, say so explicitly and name which one governs and why — version, jurisdiction, or ownership usually settles it. Silence is a finding too: if the documentation does not answer the question, report that rather than inferring an answer.
+
+  **Structure the output:**
+  1. **Answer** — the direct answer to `question` in a few sentences, stated at the confidence the evidence supports.
+  2. **Findings** — one claim per line, each with its source link and, where it matters, the version or date the claim holds for.
+  3. **Conflicts and gaps** — where sources disagree, and what could not be established.
+  4. **Sources** — every URL consulted, with a one-line note on what it was good for.
+
+  Keep `scope` as the boundary: do not widen into adjacent questions, but flag interesting adjacent findings in one line at the end rather than absorbing them.
+inputs:
+- name: question
+  type: string
+  description: The question to research.
+  required: true
+- name: scope
+  type: string
+  description: 'Boundaries: versions, platforms, timeframe, or what is out of scope.'
+  required: false

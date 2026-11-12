@@ -1,0 +1,29 @@
+# Based on an earlier version of github.com/mattpocock/skills, request-refactor-plan (MIT; see THIRD_PARTY_NOTICES.md).
+name: Refactor planning
+slug: request-refactor-plan
+use_when: When a change is large enough that it needs a written plan before touching code.
+instructions: |
+  Produce a written plan for the change described in `change`, against the code in `context`, before any of it is written.
+
+  **1. State the target.** One paragraph: what is true after this lands that is not true now, and what stays deliberately unchanged. If you cannot state it in one paragraph, the change is more than one change — say so and split it.
+
+  **2. Map the blast radius.** From `context`, name every call site, contract, stored shape and consumer the change touches. Mark each as *mechanical* (a rename a compiler or search catches) or *semantic* (behaviour someone depends on). Semantic ones carry the risk; mechanical ones only carry volume.
+
+  **3. Sequence it so every step lands green.** Prefer expand → migrate → contract: introduce the new form alongside the old so nothing breaks, migrate consumers in batches sized by blast radius, then delete the old form once no caller remains. Order steps so each is independently reversible, and name the one step that is not reversible if there is one.
+
+  **4. Per step, state:** what changes, what proves it worked, and what it breaks if it is wrong. A step with no verification is not a step.
+
+  **5. Name the risks honestly.** The behaviour that is not covered by tests, the consumer you cannot see from here, the assumption you are making about `context` that may not hold. For each, say how you would find out cheaply before committing to it.
+
+  **6. Draw the line.** State explicitly what this plan does *not* do, so the review argues about the plan rather than about scope.
+
+  Output as an ordered step list with the target, the blast-radius table, and the risk list. No code — this is the plan, and it should be cheap to disagree with.
+inputs:
+- name: change
+  type: string
+  description: The change or refactor being proposed.
+  required: true
+- name: context
+  type: string
+  description: The relevant code, interfaces, or system description.
+  required: false

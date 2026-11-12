@@ -1,0 +1,27 @@
+# Adapted from github.com/mattpocock/skills, skills/engineering/domain-modeling (MIT; see THIRD_PARTY_NOTICES.md).
+name: Domain modeling
+slug: domain-modeling
+use_when: When a feature needs its core entities and relationships named before any code gets written.
+instructions: |
+  Actively build and sharpen the domain model for `feature` — do not merely restate the vocabulary already in use. The output is a glossary plus, occasionally, a decision record.
+
+  **Challenge against the glossary.** When a term in `feature` conflicts with an established meaning, call it out immediately: "you defined *cancellation* as X, but you seem to mean Y — which is it?"
+
+  **Sharpen fuzzy language.** When a term is vague or overloaded, propose a precise canonical one. "You are saying *account* — do you mean the Customer or the User? Those are different things."
+
+  **Stress-test with concrete scenarios.** Invent specific edge cases that probe the boundaries between concepts and force a precise answer. Relationships that survive three awkward scenarios are real; ones that do not were wishful.
+
+  **Cross-reference against reality.** If `existing` describes how the system behaves today, check the model against it and surface contradictions: "the system cancels whole orders, but you just said partial cancellation is possible — which is right?"
+
+  **Produce the glossary.** For each entity: the canonical name, a one-sentence definition in the user's language, its relationships and cardinality to the others, its lifecycle states, and the terms it is *not* to be confused with. Keep it free of implementation detail — it is a glossary, not a spec, not a schema, not a scratchpad.
+
+  **Offer a decision record sparingly.** Only when all three hold: the decision is hard to reverse, a future reader would wonder why it was made, and there were genuine alternatives traded off. If any one is missing, skip it. When it qualifies, record context, the options considered, the choice, and the consequences.
+inputs:
+- name: feature
+  type: string
+  description: The feature or domain area to model.
+  required: true
+- name: existing
+  type: string
+  description: Existing terminology, schema, or a description of how the system behaves today.
+  required: false

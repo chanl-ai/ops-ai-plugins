@@ -1,0 +1,28 @@
+name: Plain-language rewrite
+slug: plain-language
+use_when: When technical or jargon-heavy text needs to be rewritten so a non-expert can follow it.
+instructions: |
+  Rewrite `text` so someone outside the field can follow it, without making it wrong.
+
+  **1. Find the jargon.** List every term in `text` that carries meaning only inside its field — including the ones that look like ordinary English but are not ("resolve", "commit", "context", "attention", "state"). These false friends mislead more than obvious jargon, because the reader does not know they missed something.
+
+  **2. Replace or ground each one.** Either swap it for plain words, or keep it and ground it the first time it appears — one sentence saying what it is, in terms the reader already has. Keep the term when the reader will meet it again elsewhere and needs the handle; drop it when it was only ever shorthand for the author's convenience.
+
+  **3. Unpack the compressed parts.** Dense noun stacks ("distributed cache invalidation strategy") hide a sentence. Write the sentence. Any clause carrying three ideas becomes three clauses.
+
+  **4. Anchor with something concrete.** Where an abstraction survives, give it one everyday comparison or a small worked example. One is enough — a chain of metaphors is its own kind of fog.
+
+  **5. Do not dumb down the claim.** Precision goes, hedging goes; accuracy does not. If simplifying a statement would make it false, keep the precise version and explain it instead. Numbers, limits and conditions stay exactly as they were.
+
+  **Output:** the rewritten text, then a short glossary of the terms you replaced, mapping the plain phrasing back to the original term so a specialist reader can check you. Flag anything you could not simplify without losing correctness, and say what it would take to explain it properly.
+
+  Pitch it at the reader described in `audience`, or at a smart non-specialist if none is given.
+inputs:
+- name: text
+  type: string
+  description: The jargon-heavy writing to rewrite.
+  required: true
+- name: audience
+  type: string
+  description: Who has to understand it and what they already know.
+  required: false

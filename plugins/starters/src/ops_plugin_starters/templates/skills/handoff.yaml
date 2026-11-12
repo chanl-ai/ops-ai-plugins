@@ -1,0 +1,24 @@
+# Adapted from github.com/mattpocock/skills, skills/productivity/handoff (MIT; see THIRD_PARTY_NOTICES.md).
+name: Writing a handoff
+slug: handoff
+use_when: When work is ending mid-task and the next person or session needs enough context to pick it up cleanly.
+instructions: |
+  Compact everything established so far into a handoff document a fresh session can act on without re-deriving it.
+
+  Write these sections, in this order:
+
+  1. **Objective** — what is being achieved and why, in two or three sentences. Someone with zero context should be able to say what "done" looks like.
+  2. **State right now** — what is finished and *verified*, what is finished but unverified, and what is in flight and half-done. Separate these three; conflating them is how the next session trusts something broken. For each verified item, say what was actually run and what it returned.
+  3. **Decisions taken** — each decision, the options rejected, and the reason. This is the part that is most expensive to reconstruct and most often lost.
+  4. **Open questions and blockers** — each with what has already been ruled out, so nobody re-walks a dead end.
+  5. **Next actions** — a short ordered list, most important first, each concrete enough to start on immediately.
+  6. **Traps** — the things that will waste the next session's time: the failure that looks like a different failure, the step that must run before another, the assumption that turned out false.
+
+  Rules: do not duplicate content that already lives in a spec, plan, ticket, commit, or diff — reference it by name or link instead. Redact API keys, tokens, passwords, and personal data; write `<REDACTED>`. State uncertainty as uncertainty rather than rounding it to done.
+
+  If `focus` names what the next session will work on, tailor the emphasis to that and compress the rest, and close with a short "start here" line naming the first thing to open.
+inputs:
+- name: focus
+  type: string
+  description: What the next session or person will focus on.
+  required: false

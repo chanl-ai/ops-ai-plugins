@@ -1,0 +1,99 @@
+# The starters pack: skills a team starts from (drafting, reviewing, planning, research). It brings templates only,
+# so it asks for no account and reaches no host. A team adds the ones it uses and edits its own copy.
+schema: ops-ai/plugin@2
+id: opsai.starters
+title: Starter skills
+version: 0.1.0
+sdk: '1'
+display:
+  category: Core
+  description: 'Skills a team starts from: drafting, reviewing, planning and research.'
+templates:
+- kind: skill
+  id: claude-api
+  version: 1
+  path: templates/skills/claude-api.yaml
+- kind: skill
+  id: code-review
+  version: 1
+  path: templates/skills/code-review.yaml
+- kind: skill
+  id: diagnosing-bugs
+  version: 1
+  path: templates/skills/diagnosing-bugs.yaml
+- kind: skill
+  id: domain-modeling
+  version: 1
+  path: templates/skills/domain-modeling.yaml
+- kind: skill
+  id: mcp-builder
+  version: 1
+  path: templates/skills/mcp-builder.yaml
+- kind: skill
+  id: request-refactor-plan
+  version: 1
+  path: templates/skills/request-refactor-plan.yaml
+- kind: skill
+  id: tdd
+  version: 1
+  path: templates/skills/tdd.yaml
+- kind: skill
+  id: plain-language
+  version: 1
+  path: templates/skills/plain-language.yaml
+- kind: skill
+  id: doc-coauthoring
+  version: 1
+  path: templates/skills/doc-coauthoring.yaml
+- kind: skill
+  id: edit-article
+  version: 1
+  path: templates/skills/edit-article.yaml
+- kind: skill
+  id: to-issues
+  version: 1
+  path: templates/skills/to-issues.yaml
+- kind: skill
+  id: to-prd
+  version: 1
+  path: templates/skills/to-prd.yaml
+- kind: skill
+  id: to-tickets
+  version: 1
+  path: templates/skills/to-tickets.yaml
+- kind: skill
+  id: writing-for-agents
+  version: 1
+  path: templates/skills/writing-for-agents.yaml
+- kind: skill
+  id: writing-shape
+  version: 1
+  path: templates/skills/writing-shape.yaml
+- kind: skill
+  id: decision-mapping
+  version: 1
+  path: templates/skills/decision-mapping.yaml
+- kind: skill
+  id: research
+  version: 1
+  path: templates/skills/research.yaml
+- kind: skill
+  id: ubiquitous-language
+  version: 1
+  path: templates/skills/ubiquitous-language.yaml
+- kind: skill
+  id: handoff
+  version: 1
+  path: templates/skills/handoff.yaml
+- kind: skill
+  id: qa
+  version: 1
+  path: templates/skills/qa.yaml
+- kind: skill
+  id: triage
+  version: 1
+  path: templates/skills/triage.yaml
+- kind: skill
+  id: zoom-out
+  version: 1
+  path: templates/skills/zoom-out.yaml

@@ -1,0 +1,27 @@
+# Adapted from github.com/mattpocock/skills, skills/engineering/to-tickets (MIT; see THIRD_PARTY_NOTICES.md).
+name: Turn issues into tickets
+slug: to-tickets
+use_when: When a set of issues needs to become actionable, estimable tickets.
+instructions: |
+  Break `source` into a set of tickets — tracer-bullet vertical slices, each declaring the tickets that block it.
+
+  **1. Read the source in full**, including any comments or decisions embedded in it. Use its vocabulary in every title and description.
+
+  **2. Draft vertical slices.** Each slice cuts a narrow but *complete* path through every layer — schema, API, UI, tests — never a horizontal slice of one layer. A completed slice is demoable or verifiable on its own, and is sized to fit one fresh working session. Any prefactoring goes first: make the change easy, then make the easy change.
+
+  **3. Declare blocking edges.** Give each ticket the tickets that must finish before it can start. A ticket with no blockers can start immediately. Number tickets in dependency order, blockers first.
+
+  **Wide refactors are the exception.** A mechanical change whose blast radius fans across the whole codebase — renaming a column, retyping a shared symbol — cannot land as a vertical slice. Sequence it expand → migrate → contract: add the new form beside the old, migrate call sites in batches sized by blast radius (each batch its own ticket, blocked by the expand), then delete the old form in a final ticket blocked by every batch.
+
+  **4. Quiz before finalising.** Present the breakdown as a numbered list — title, blocked by, what it delivers end to end — and ask: is the granularity right, are the blocking edges genuine gates, should anything merge or split? Iterate until approved.
+
+  **5. Emit each ticket** with: what to build (the end-to-end behaviour from the user's perspective, not a layer-by-layer task list), acceptance criteria as checkboxes, and blocked-by references. Honour any slice size or ticket cap given in `granularity`. Avoid file paths and code snippets — they go stale fast. The exception is a snippet that encodes a decision more precisely than prose can (a state machine, a schema, a type shape); inline only the decision-rich part.
+inputs:
+- name: source
+  type: string
+  description: The plan, spec, or discussion to break into tickets.
+  required: true
+- name: granularity
+  type: string
+  description: Preferred slice size or a cap on ticket count.
+  required: false

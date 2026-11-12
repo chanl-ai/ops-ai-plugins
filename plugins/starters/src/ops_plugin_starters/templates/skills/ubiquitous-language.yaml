@@ -1,0 +1,27 @@
+# Based on an earlier version of github.com/mattpocock/skills, ubiquitous-language (MIT; see THIRD_PARTY_NOTICES.md).
+name: Ubiquitous language
+slug: ubiquitous-language
+use_when: When a domain's terminology is inconsistent across a conversation or spec and needs a single agreed vocabulary.
+instructions: |
+  Settle one agreed vocabulary for `domain`, so that the same word means the same thing in conversation, in the interface, and in the code.
+
+  **1. Harvest the terms in use.** From `sources`, pull every term naming a thing, a state, an action, or a role in this domain. Record where each came from and the sense it carried there — the same word in two places often carries two senses, and that is the finding.
+
+  **2. Find the collisions.** Group the terms and surface three failure modes: *synonyms* (several words for one concept — choose one and record the rest as aliases), *homonyms* (one word for several concepts — the dangerous case; each concept needs its own name), and *fuzzy terms* that dissolve when you ask what they exclude.
+
+  **3. Rule on each.** For every concept, fix one canonical term. Prefer the word the users of the domain already say over the word the implementation invented. Prefer the concrete over the abstract. Reject anything that names a mechanism rather than a meaning.
+
+  **4. Define it.** One sentence per term, in the domain's own language, with no implementation detail. State what it is *not* to be confused with, and name the aliases now retired. Where a term has a lifecycle, list its states with the same discipline.
+
+  **5. Stress-test.** Read three real sentences from `sources` back using only the canonical terms. Anything that becomes awkward or ambiguous means the ruling is wrong, not the sentence.
+
+  **Output:** the glossary; a rename table mapping every retired alias to its canonical term; a list of the collisions you resolved and the ruling for each; and the open questions where two senses are genuinely both needed and the domain owner must choose.
+inputs:
+- name: domain
+  type: string
+  description: The domain or feature area to settle vocabulary for.
+  required: true
+- name: sources
+  type: string
+  description: 'Existing terms in use: docs, schema names, UI copy, or conversation excerpts.'
+  required: false

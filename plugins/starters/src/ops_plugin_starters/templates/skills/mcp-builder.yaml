@@ -1,0 +1,31 @@
+# Adapted from github.com/anthropics/skills, skills/mcp-builder (Apache-2.0; see THIRD_PARTY_NOTICES.md).
+name: Building an MCP server
+slug: mcp-builder
+use_when: When designing a new MCP server or tool surface and the tool/prompt contract needs to be worked out.
+instructions: |
+  Design the tool and prompt surface for an MCP server over `service`. This is design and planning — produce the contract, not an implementation.
+
+  **1. Understand the API.** From `service` and `api_docs`, identify the resources, the operations on each, the auth model, the pagination style, and the data shapes. Note which operations are read-only and which mutate or destroy.
+
+  **2. Choose coverage over cleverness.** Balance comprehensive endpoint coverage against a few specialised workflow tools. Workflow tools are convenient for one known task; comprehensive coverage lets an agent compose operations you did not anticipate. When uncertain, prioritise coverage.
+
+  **3. Name for discoverability.** Consistent prefixes and action-oriented names — `github_create_issue`, `github_list_repos`. An agent finds the right tool by name before it reads the description.
+
+  **4. Specify each tool** with: name; a concise description of what it does and when to reach for it; an input schema with constraints, per-field descriptions and an example value in each; an output schema so clients can process results structurally; and the behavioural annotations `readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`.
+
+  **5. Manage context.** Tools return focused, relevant data — support filtering and pagination rather than dumping a full payload into the agent's window. Descriptions stay concise; verbosity costs on every turn.
+
+  **6. Make errors actionable.** An error message should tell the agent what to do next — which parameter was wrong and what a valid one looks like — not merely that something failed.
+
+  **7. Plan the evaluation.** Draft 10 questions that exercise the server: each independent of the others, read-only, complex enough to need several tool calls, realistic, stable over time, and verifiable against a single clear answer. These are the acceptance criteria for the design.
+
+  Deliver: the tool list with schemas and annotations, the auth and pagination decisions, an explicit list of what is deliberately out of scope, and the 10 evaluation questions.
+inputs:
+- name: service
+  type: string
+  description: The service or API the MCP server will expose.
+  required: true
+- name: api_docs
+  type: string
+  description: Pasted API documentation, endpoint list, or OpenAPI excerpt.
+  required: false

@@ -1,0 +1,27 @@
+# Adapted from github.com/mattpocock/skills, skills/engineering/diagnosing-bugs (MIT; see THIRD_PARTY_NOTICES.md).
+name: Diagnosing bugs
+slug: diagnosing-bugs
+use_when: When a reported symptom needs a structured root-cause pass instead of a guess-and-check fix.
+instructions: |
+  A discipline for hard bugs and performance regressions reported as `symptom`. Skip a phase only with explicit justification, and redact every secret you quote back.
+
+  **Phase 1 — Build a feedback loop. This is the skill; everything else is mechanical.** With a *tight* pass/fail signal that goes red on *this* bug, you will find the cause. Without one, staring at code will not save you. Be relentless here. In rough order, propose: a failing test at whatever seam reaches the bug; an HTTP call or CLI invocation diffed against known-good output; a replay of a captured request or event log; a harness exercising just the bug path; a fuzz loop for "sometimes wrong" output; a bisection between two known-good states. Then **tighten** it: faster, sharper (assert the exact symptom, not "did not crash"), deterministic (pin time, seed the RNG). For flaky bugs the goal is a *higher reproduction rate*, not a clean repro. Name one command the user can run and ask for its redacted output. **No red-capable command, no Phase 2** — jumping to a hypothesis is the exact failure this prevents.
+
+  **Phase 2 — Reproduce and minimise.** Confirm it fails as the user described, not a lookalike. Then cut inputs, config, callers and steps one at a time until every remaining element is load-bearing.
+
+  **Phase 3 — Hypothesise.** Produce 3–5 *ranked, falsifiable* hypotheses before testing any: "if X is the cause, changing Y makes it disappear." A hypothesis with no prediction is a vibe. Show the list to the user first — they often re-rank it instantly.
+
+  **Phase 4 — Instrument.** One probe per prediction, one variable at a time. Prefer a debugger or boundary logs over logging everything; tag each with a unique prefix so cleanup is one search. For performance, measure a baseline, then bisect.
+
+  **Phase 5 — Fix and lock down.** Write the regression test before the fix, but only at a seam that exercises the real bug pattern; if none exists, that *is* the finding. Re-run the loop, remove the tagged instrumentation, state the winning hypothesis, and close with: what would have prevented this?
+
+  Treat `context` as the system's known state.
+inputs:
+- name: symptom
+  type: string
+  description: 'What is broken, from the reporter''s words: error, wrong output, or slow path.'
+  required: true
+- name: context
+  type: string
+  description: Relevant code, logs, config, or recent changes.
+  required: false

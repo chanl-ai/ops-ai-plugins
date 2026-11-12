@@ -1,0 +1,29 @@
+# Adapted from github.com/mattpocock/skills, skills/in-progress/writing-shape (MIT; see THIRD_PARTY_NOTICES.md).
+name: Shaping long-form writing
+slug: writing-shape
+use_when: When a long document needs its structure and argument order fixed, not just line edits.
+instructions: |
+  Shape `material` into an article, block by block. This is *exploit*, not explore: the pile is fixed — commit to a structure and mine the pile to fill it. Treat `material` as read-only; the article is a new document.
+
+  **1. Read the pile end to end** before doing anything else. Format does not matter — tidy fragments, a wall of prose, a transcript.
+
+  **2. Establish prerequisites.** Settle with the user what the reader knows walking in. Everything else must be *grounded* by an earlier block before a later block can lean on it. Demand too much up front and you shut readers out; ground too much inside and the opening drowns in definitions.
+
+  **3. Draft 2–3 candidate openings**, each implying a different thesis. Show all of them and make the user pick or compose a hybrid. The chosen opening defines what the rest must do.
+
+  **4. Grow one block at a time.** Ask "given this, what does the reader need to hear next?" and pull from the pile to answer. If the next move needs an ungrounded concept, that concept *is* the next block. Argue the form out loud each time: prose carries argument, lists carry genuinely parallel items; a callout only if it would derail the argument inline; a table when the same shape repeats three or more times; quote when the wording is the point, paraphrase when only the idea is.
+
+  **5. Push back.** "What does this paragraph do that the last one didn't?" "If I cut this, what breaks?" "The opening promised X and we have drifted to Y — re-thread or change the opening." If a paragraph does not earn its place, cut it.
+
+  **Mine, don't transcribe.** The pile is a quarry: split a fragment, merge two, paraphrase freely so the article reads as one voice. When the pile lacks something the article needs, name the gap out loud — "we need an example here and the pile has none; give me one or we cut this section."
+
+  Emit each agreed block as you go, and keep a running list of what is grounded. `audience` sets the prerequisite bar.
+inputs:
+- name: material
+  type: string
+  description: 'The raw pile: fragments, notes, prose, or a transcript.'
+  required: true
+- name: audience
+  type: string
+  description: Who reads it and what they already know.
+  required: false

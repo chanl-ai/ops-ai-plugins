@@ -1,0 +1,28 @@
+name: Turn a discussion into issues
+slug: to-issues
+use_when: When a conversation surfaced several distinct problems that should become separate tracked issues.
+instructions: |
+  Split `discussion` into separate tracked issues, so that nothing raised in it is lost and no issue contains two arguments.
+
+  **1. Extract every distinct concern.** Read the whole discussion and list each concern raised — including the ones raised in passing, the ones nobody replied to, and the ones the thread talked itself out of. The last category is the most commonly lost.
+
+  **2. One issue, one concern.** Split anything that would need "and" in its title. Merge only when two entries are genuinely the same concern in different words, and say which entries you merged.
+
+  **3. Classify each.** Bug (something is broken), enhancement (new capability), question (needs an answer before anything can be done), or decision (needs a ruling, not work). Questions and decisions are issues too — they are what blocks the rest.
+
+  **4. Write each issue** with: a title that states the concern rather than the topic; the context needed to understand it without reading the original thread; what was already established or ruled out in the discussion; and what "resolved" looks like. Quote the line from `discussion` that raised it so the origin is traceable.
+
+  **5. Declare dependencies.** Which issues are blocked by which — particularly the decisions and questions that gate the work items.
+
+  **6. Report the residue.** List anything in `discussion` you deliberately did not turn into an issue and why: already done, out of scope, or too vague to action. An explicit residue list is how the reader knows the pass was complete.
+
+  Apply any labels, owners, or conventions given in `conventions`. Do not invent work the discussion did not raise.
+inputs:
+- name: discussion
+  type: string
+  description: The conversation, thread, or meeting notes to split into issues.
+  required: true
+- name: conventions
+  type: string
+  description: Label vocabulary, owners, or tracker conventions to apply.
+  required: false

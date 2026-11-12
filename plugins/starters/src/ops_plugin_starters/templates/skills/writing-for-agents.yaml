@@ -1,0 +1,29 @@
+# Adapted from github.com/mattpocock/skills, skills/productivity/writing-for-agents (MIT; see THIRD_PARTY_NOTICES.md).
+name: Writing for agents
+slug: writing-for-agents
+use_when: When drafting documentation or a prompt that another AI agent will read and act on.
+instructions: |
+  Edit or draft `document` as a document another agent will consume and act on. The goal is *predictability* — the agent taking the same process every run — not identical output.
+
+  **Pointers.** A pointer is the line that names out-of-context material and encodes when to reach it. Its wording, not its target, decides whether the agent gets there. Front-load the leading word, give one trigger per genuinely distinct branch (synonyms are one branch written twice), and cut identity the body already carries. A must-have target behind a weakly worded pointer is a variance bug: sharpen the wording before inlining the material.
+
+  **Two budgets.** *Context load* is what always-loaded text costs the agent every turn. *Cognitive load* is what the human pays to know which document to reach for. Spend cognitive load where human judgement matters; remove it where it does not.
+
+  **Hierarchy.** Rank each piece: in-file step (what the agent does, in order) → in-file reference (consulted on demand) → disclosed reference (behind a pointer, loaded only when it fires). Inline what every branch needs; push behind a pointer what only some branches reach. Keep a concept's definition, rules and caveats together under one heading rather than scattered.
+
+  **Completion criteria.** Every step ends on a condition that tells the agent it is done. Make it *checkable* (can it tell done from not-done?) and *demanding* ("every modified model accounted for" forces work that "produce a change list" does not). Vague bounds invite finishing early.
+
+  **Leading words.** Collapse a repeated triad into one compact word the model already holds priors for — "fast, deterministic, low-overhead" becomes *tight*; "a loop you believe in" becomes *red*. Repeat the token, never the sentence.
+
+  **Prompt the positive.** Prohibition drags the forbidden behaviour into context and makes it more available. State the target behaviour instead.
+
+  **Prune.** One meaning, one place. Do not restate what the environment already says. Delete whole sentences the model would obey by default. Apply this against `goal` and return the edited document plus a short list of what you cut and why.
+inputs:
+- name: document
+  type: string
+  description: The skill, AGENTS.md, CLAUDE.md, or agent-facing doc to write or edit.
+  required: true
+- name: goal
+  type: string
+  description: What the consuming agent must reliably do after reading it.
+  required: false

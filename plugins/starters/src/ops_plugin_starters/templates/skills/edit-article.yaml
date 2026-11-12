@@ -1,0 +1,26 @@
+name: Editing for clarity
+slug: edit-article
+use_when: When a piece of writing needs a clarity and tightening pass before it's shared.
+instructions: |
+  Do a clarity and tightening pass on `text`. Preserve the author's voice and argument — you are sharpening what is there, not rewriting it as your own.
+
+  **Pass 1 — Argument.** Does each paragraph do something the previous one did not? Mark any paragraph that restates, drifts, or exists only as a transition. If the piece promises one thing in its opening and delivers another, say so plainly at the top — that is the finding, and no amount of sentence polish fixes it.
+
+  **Pass 2 — Sentences.** Cut hedges ("it could be argued", "somewhat", "in order to"), filler ("simply", "just", "obviously", "of course" — if it were obvious the sentence would not be needed), and throat-clearing openers that delay the point. Split any sentence doing two jobs. Replace abstract nouns with the verb hiding inside them. Prefer the active voice unless the actor genuinely does not matter.
+
+  **Pass 3 — Concreteness.** Every general claim should be followed by the specific thing it is general about. Where a claim has no example, flag it rather than inventing one.
+
+  **Pass 4 — Form.** Prose carries argument; lists carry genuinely parallel items. If a list's items are not parallel, it should be prose. If the same shape repeats three or more times with the same fields, it should be a table.
+
+  **Output:** the edited text, then a short change log — what you cut and why, grouped by the pass that caught it — then a "left alone" list naming anything that reads oddly but is the author's deliberate choice. Where a cut changes meaning rather than just length, flag it separately for the author's ruling.
+
+  Honour tone, length, or house-style constraints in `constraints`.
+inputs:
+- name: text
+  type: string
+  description: The writing to edit.
+  required: true
+- name: constraints
+  type: string
+  description: Tone, audience, length limit, or house style to preserve.
+  required: false

@@ -1,0 +1,33 @@
+# Based on an earlier version of github.com/mattpocock/skills, to-prd (MIT; see THIRD_PARTY_NOTICES.md).
+name: Turn a request into a PRD
+slug: to-prd
+use_when: When a rough feature ask needs to become a structured product requirements doc.
+instructions: |
+  Turn the rough ask in `request` into a structured PRD. Synthesise what is already there; ask only about gaps you genuinely cannot fill.
+
+  **Problem statement.** The problem as the user experiences it, in their language — not as a missing feature. If `request` names a solution rather than a problem, work backwards to the problem it implies and confirm it.
+
+  **Who it is for.** The specific user or role, what they are doing when they hit this, and how often. A PRD that says "users" has not been written yet.
+
+  **Proposed solution.** The change from the user's point of view: what they can now do that they could not. No implementation detail.
+
+  **User stories.** A long numbered list, each as *as a `<role>`, I want `<capability>`, so that `<benefit>`*. Cover the main path, the empty and first-run states, the error and permission cases, and the administrative side. Extensiveness here is the point — this list is where scope gets argued.
+
+  **Acceptance criteria.** Per story where it is not obvious: the observable condition that proves it works. Written so someone who did not build it can check it.
+
+  **Decisions and constraints.** Interfaces and contracts affected, data the feature needs, decisions already settled and why, and constraints that bound the design. No file paths or code snippets — they go stale. The exception is a schema or state machine that encodes a decision more precisely than prose can.
+
+  **Out of scope.** An explicit list. This section is what stops the PRD growing in review.
+
+  **Open questions.** Each one with who can answer it and what it blocks.
+
+  Use any audience, timeline, or constraint given in `context`, and flag every assumption you had to make rather than burying it.
+inputs:
+- name: request
+  type: string
+  description: The rough feature ask or problem statement.
+  required: true
+- name: context
+  type: string
+  description: Audience, constraints, timeline, or existing system behaviour.
+  required: false

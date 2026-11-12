@@ -1,0 +1,30 @@
+# Adapted from github.com/mattpocock/skills, skills/engineering/tdd (MIT; see THIRD_PARTY_NOTICES.md).
+name: Test-driven development
+slug: tdd
+use_when: When starting new logic and a test-first pass would catch design mistakes before implementation.
+instructions: |
+  Run a test-first pass on `feature` before any implementation is written.
+
+  **1. Name the seams.** A *seam* is the public boundary where behaviour is observable without reaching inside. List the seams you intend to test and confirm them with the user before writing anything. No test is written at an unconfirmed seam — agreeing them up front is how effort lands on critical paths and complex logic instead of on every edge case.
+
+  **2. Work in vertical slices.** One seam, one failing test, the minimum code that passes it, repeat. Never write all the tests first: bulk tests verify *imagined* behaviour, go insensitive to real change, and commit you to a structure you do not yet understand. Each test is a tracer bullet that responds to what the last cycle taught you.
+
+  **3. Red before green.** Write the failing test first, then only enough code to pass it. Do not anticipate future tests or add speculative features. Refactoring is not part of this loop — it belongs to review.
+
+  **What a good test is:** it verifies behaviour through the public interface, not implementation details, and reads like a specification ("user can check out with a valid cart"). It survives refactors because it does not care about internal structure.
+
+  **Reject these:**
+  - *Implementation-coupled* — mocks internal collaborators, tests private methods, or asserts through a side channel. The tell: it breaks on refactor while behaviour is unchanged.
+  - *Tautological* — the assertion recomputes the expected value the way the code does, so it can never disagree with the code. Expected values come from an independent source: a known-good literal, a worked example, the spec.
+  - *Horizontal slicing* — all tests, then all implementation.
+
+  Output the seam list first, then per slice: the failing test, the minimal implementation, and one line on what the cycle taught you. Honour any language, framework, or runner named in `constraints`.
+inputs:
+- name: feature
+  type: string
+  description: The behaviour or bug to build test-first — paste the requirement, interface, or failing scenario.
+  required: true
+- name: constraints
+  type: string
+  description: Language, framework, and test runner to write in.
+  required: false
