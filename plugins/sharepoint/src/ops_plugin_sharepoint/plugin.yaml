@@ -112,6 +112,8 @@ knowledge_sources:
     get: get_file
     changes: list_file_changes
     scopes: list_scopes
+    # Its items are documents, so Files can watch its folders.
+    files: true
     # Each fetch is three Graph calls (metadata, content, permissions), so a few at once keeps well under Graph's throttle.
     fetch_at_once: 4
     inputs:
