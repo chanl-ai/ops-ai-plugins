@@ -196,7 +196,8 @@ def test_a_file_over_graphs_size_cap_is_listed_as_skipped() -> None:
     graph = FakeGraph()
     graph.drives[LIB_POLICIES]["p3"].size = 30 * 1024 * 1024
     got = listing(graph, {"libraries": [LIB_POLICIES]})
-    assert {r["title"]: r.get("skipped") for r in got["items"]}["travel.pdf"] == "Larger than 25 MB"
+    row = {r["title"]: r for r in got["items"]}["travel.pdf"]
+    assert (row.get("skipped"), row.get("size")) == ("Larger than 25 MB", 30 * 1024 * 1024)
 
 
 def test_a_source_with_no_sites_and_no_libraries_is_refused() -> None:

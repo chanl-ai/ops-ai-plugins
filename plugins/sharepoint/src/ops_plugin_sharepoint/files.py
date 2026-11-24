@@ -191,6 +191,9 @@ def _row(drive: str, item: dict[str, Any], rules: Rules) -> dict[str, Any] | Non
     }
     if item.get("eTag"):
         row["marker"] = item["eTag"]
+    # A file refused for its size is reported with it, so a watched folder's failed file says how large it is.
+    if isinstance(item.get("size"), int):
+        row["size"] = item["size"]
     if why := rules.says(path):
         row["skipped"] = why
     elif int(item.get("size") or 0) > MAX_BYTES:
