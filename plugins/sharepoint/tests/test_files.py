@@ -197,7 +197,12 @@ def test_a_file_over_graphs_size_cap_is_listed_as_skipped() -> None:
     graph.drives[LIB_POLICIES]["p3"].size = 30 * 1024 * 1024
     got = listing(graph, {"libraries": [LIB_POLICIES]})
     row = {r["title"]: r for r in got["items"]}["travel.pdf"]
-    assert (row.get("skipped"), row.get("size")) == ("Larger than 25 MB", 30 * 1024 * 1024)
+    # The code tells a refusal for its size (a failed file in a watched folder) from one a rule left out (no failure).
+    assert (row.get("skipped"), row.get("skipped_code"), row.get("size")) == (
+        "Larger than 25 MB",
+        "TOO_LARGE",
+        30 * 1024 * 1024,
+    )
 
 
 def test_a_source_with_no_sites_and_no_libraries_is_refused() -> None:

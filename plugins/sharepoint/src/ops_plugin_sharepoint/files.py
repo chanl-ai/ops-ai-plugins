@@ -197,7 +197,8 @@ def _row(drive: str, item: dict[str, Any], rules: Rules) -> dict[str, Any] | Non
     if why := rules.says(path):
         row["skipped"] = why
     elif int(item.get("size") or 0) > MAX_BYTES:
-        row["skipped"] = "Larger than 25 MB"
+        # The code marks a refusal for its size, which a watched folder records as a failed file; a rule's is none.
+        row["skipped"], row["skipped_code"] = "Larger than 25 MB", "TOO_LARGE"
     return row
 
 
